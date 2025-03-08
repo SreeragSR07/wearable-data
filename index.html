@@ -28,17 +28,22 @@
     <h2>Live Data from ThingSpeak</h2>
     <div class="data-box">Heart Rate: <span id="heartRate">Loading...</span> BPM</div>
     <div class="data-box">Button Status: <span id="buttonStatus">Loading...</span></div>
+    
+    <div>
+        <button onclick="fetchData()">Refresh Data</button>
+    </div>
 
     <script>
-        const channelID = "2865083";  // ThingSpeak Channel ID
-        const apiKey = "JB035BQVNPNCBMKN";   // ThingSpeak Read API Key
+        const channelID = "2865083";  // Your ThingSpeak Channel ID
+        const apiKey = "JB035BQVNPNCBMKN";   // Your Read API Key
 
         async function fetchData() {
             try {
-                let response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
+                let response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}&nocache=${Date.now()}`);
                 let data = await response.json();
+                console.log("Fetched Data:", data); // Debugging log
                 
-                // Extract values
+                // Read fields
                 let heartRate = data.field1;
                 let buttonStatus = data.field5;
 
@@ -46,7 +51,6 @@
                 document.getElementById("heartRate").innerText = heartRate ? heartRate : "No Data";
                 document.getElementById("buttonStatus").innerText = buttonStatus == 1 ? "EMERGENCY!" : "Normal";
 
-                // Change color if emergency
                 if (buttonStatus == 1) {
                     document.getElementById("buttonStatus").classList.add("emergency");
                 } else {
@@ -59,11 +63,10 @@
             }
         }
 
-        // Fetch data initially and every 20 seconds
+        // Fetch data immediately & every 20 seconds
         fetchData();
         setInterval(fetchData, 20000);
     </script>
 
 </body>
 </html>
-

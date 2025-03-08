@@ -26,9 +26,16 @@
 <body>
 
     <h2>Live Data from ThingSpeak</h2>
+
     <div class="data-box">Heart Rate: <span id="heartRate">Loading...</span> BPM</div>
     <div class="data-box">Button Status: <span id="buttonStatus">Loading...</span></div>
-    
+    <div class="data-box">Accel X: <span id="accelX">Loading...</span></div>
+    <div class="data-box">Accel Y: <span id="accelY">Loading...</span></div>
+    <div class="data-box">Accel Z: <span id="accelZ">Loading...</span></div>
+    <div class="data-box">Latitude: <span id="latitude">Loading...</span></div>
+    <div class="data-box">Longitude: <span id="longitude">Loading...</span></div>
+    <div class="data-box">Battery: <span id="battery">Loading...</span></div>
+
     <div>
         <button onclick="fetchData()">Refresh Data</button>
     </div>
@@ -45,12 +52,24 @@
                 
                 // Read fields
                 let heartRate = data.field1;
+                let accelX = data.field2;
+                let accelY = data.field3;
+                let accelZ = data.field4;
                 let buttonStatus = data.field5;
+                let latitude = data.field6;
+                let longitude = data.field7;
+                let battery = data.field8;
 
                 // Update HTML
                 document.getElementById("heartRate").innerText = heartRate ? heartRate : "No Data";
-                document.getElementById("buttonStatus").innerText = buttonStatus == 1 ? "EMERGENCY!" : "Normal";
+                document.getElementById("accelX").innerText = accelX ? accelX : "No Data";
+                document.getElementById("accelY").innerText = accelY ? accelY : "No Data";
+                document.getElementById("accelZ").innerText = accelZ ? accelZ : "No Data";
+                document.getElementById("latitude").innerText = latitude ? latitude : "No Data";
+                document.getElementById("longitude").innerText = longitude ? longitude : "No Data";
+                document.getElementById("battery").innerText = battery ? battery : "No Data";
 
+                document.getElementById("buttonStatus").innerText = buttonStatus == 1 ? "EMERGENCY!" : "Normal";
                 if (buttonStatus == 1) {
                     document.getElementById("buttonStatus").classList.add("emergency");
                 } else {
@@ -60,6 +79,12 @@
                 console.error("Error fetching ThingSpeak data:", error);
                 document.getElementById("heartRate").innerText = "Error";
                 document.getElementById("buttonStatus").innerText = "Error";
+                document.getElementById("accelX").innerText = "Error";
+                document.getElementById("accelY").innerText = "Error";
+                document.getElementById("accelZ").innerText = "Error";
+                document.getElementById("latitude").innerText = "Error";
+                document.getElementById("longitude").innerText = "Error";
+                document.getElementById("battery").innerText = "Error";
             }
         }
 

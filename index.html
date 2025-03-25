@@ -3,95 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThingSpeak Live Data</title>
+    <title>Live Sensor Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 20px;
         }
-        .data-box {
-            border: 2px solid #333;
-            padding: 15px;
-            display: inline-block;
-            margin: 10px;
-            font-size: 20px;
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
         }
-        .emergency {
-            color: red;
-            font-weight: bold;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        canvas {
+            max-width: 600px;
+            margin: 20px auto;
         }
     </style>
 </head>
 <body>
 
-    <h2>Live Data from ThingSpeak</h2>
+    <h2>📡 Live Sensor Data from ThingSpeak</h2>
 
-    <div class="data-box">Heart Rate: <span id="heartRate">Loading...</span> BPM</div>
-    <div class="data-box">Button Status: <span id="buttonStatus">Loading...</span></div>
-    <div class="data-box">Accel X: <span id="accelX">Loading...</span></div>
-    <div class="data-box">Accel Y: <span id="accelY">Loading...</span></div>
-    <div class="data-box">Accel Z: <span id="accelZ">Loading...</span></div>
-    <div class="data-box">Latitude: <span id="latitude">Loading...</span></div>
-    <div class="data-box">Longitude: <span id="longitude">Loading...</span></div>
-    <div class="data-box">Battery: <span id="battery">Loading...</span></div>
+    <p><strong>💓 Heart Rate:</strong> <span id="heartRate">Loading...</span> BPM</p>
+    <p><strong>📊 Accelerometer Data:</strong> <span id="accelerometer">Loading...</span></p>
+    <p><strong>📍 GPS Location:</strong> <span id="gps">Loading...</span></p>
 
-    <div>
-        <button onclick="fetchData()">Refresh Data</button>
-    </div>
+    <h3>📜 Last 10 Sensor Readings</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Heart Rate (BPM)</th>
+                <th>Acceleration</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+            </tr>
+        </thead>
+        <tbody id="dataTable">
+            <tr><td colspan="5">Fetching Data...</td></tr>
+        </tbody>
+    </table>
+
+    <h3>📈 Recent Data Chart</h3>
+    <canvas id="myChart"></canvas>
 
     <script>
-        const channelID = "2865083";  // Your ThingSpeak Channel ID
-        const apiKey = "JB035BQVNPNCBMKN";   // Your Read API Key
-
+        const channelID = 2865083;
+        const apiKey = "JB035BQVNPNCBMKN"; // Read API Key
+        let chart;
+        
         async function fetchData() {
+            const lastEntryURL = `https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`;
+            const historyURL = `https://api.thingspeak.com/channels/${channelID}/feeds.json?results=10&api_key=${apiKey}`;
+
             try {
-                let response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}&nocache=${Date.now()}`);
-                let data = await response.json();
-                console.log("Fetched Data:", data); // Debugging log
-                
-                // Read fields
-                let heartRate = data.field1;
-                let accelX = data.field2;
-                let accelY = data.field3;
-                let accelZ = data.field4;
-                let buttonStatus = data.field5;
-                let latitude = data.field6;
-                let longitude = data.field7;
-                let battery = data.field8;
+                // Fetch Latest Data
+                const lastResponse = await fetch(lastEntryURL);
+                const lastData = await lastResponse.json();
 
-                // Update HTML
-                document.getElementById("heartRate").innerText = heartRate ? heartRate : "No Data";
-                document.getElementById("accelX").innerText = accelX ? accelX : "No Data";
-                document.getElementById("accelY").innerText = accelY ? accelY : "No Data";
-                document.getElementById("accelZ").innerText = accelZ ? accelZ : "No Data";
-                document.getElementById("latitude").innerText = latitude ? latitude : "No Data";
-                document.getElementById("longitude").innerText = longitude ? longitude : "No Data";
-                document.getElementById("battery").innerText = battery ? battery : "No Data";
+                // Display Latest Data
+                document.getElementById("heartRate").innerText = lastData.field1;
+                document.getElementById("accelerometer").innerText = lastData.field2;
+                document.getElementById("gps").innerText = `Lat: ${lastData.field3}, Lon: ${lastData.field4}`;
 
-                document.getElementById("buttonStatus").innerText = buttonStatus == 1 ? "EMERGENCY!" : "Normal";
-                if (buttonStatus == 1) {
-                    document.getElementById("buttonStatus").classList.add("emergency");
-                } else {
-                    document.getElementById("buttonStatus").classList.remove("emergency");
-                }
+                // Fetch Last 10 Entries
+                const historyResponse = await fetch(historyURL);
+                const historyData = await historyResponse.json();
+
+                // Update Table
+                let tableBody = document.getElementById("dataTable");
+                tableBody.innerHTML = "";
+                let labels = [], heartRateData = [], accData = [];
+
+                historyData.feeds.forEach(feed => {
+                    labels.push(feed.created_at.slice(11, 19)); // Get time from timestamp
+                    heartRateData.push(feed.field1);
+                    accData.push(feed.field2);
+
+                    let row = `<tr>
+                        <td>${feed.created_at}</td>
+                        <td>${feed.field1}</td>
+                        <td>${feed.field2}</td>
+                        <td>${feed.field3}</td>
+                        <td>${feed.field4}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+
+                updateChart(labels, heartRateData, accData);
+
             } catch (error) {
-                console.error("Error fetching ThingSpeak data:", error);
-                document.getElementById("heartRate").innerText = "Error";
-                document.getElementById("buttonStatus").innerText = "Error";
-                document.getElementById("accelX").innerText = "Error";
-                document.getElementById("accelY").innerText = "Error";
-                document.getElementById("accelZ").innerText = "Error";
-                document.getElementById("latitude").innerText = "Error";
-                document.getElementById("longitude").innerText = "Error";
-                document.getElementById("battery").innerText = "Error";
+                console.error("Error fetching data:", error);
             }
         }
 
-        // Fetch data immediately & every 20 seconds
-        fetchData();
-        setInterval(fetchData, 20000);
-    </script>
+        function updateChart(labels, heartRateData, accData) {
+            let ctx = document.getElementById('myChart').getContext('2d');
+            if (chart) chart.destroy();
 
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.reverse(),
+                    datasets: [
+                        {
+                            label: "Heart Rate (BPM)",
+                            data: heartRateData.reverse(),
+                            borderColor: "red",
+                            backgroundColor: "rgba(255, 0, 0, 0.2)",
+                            fill: true
+                        },
+                        {
+                            label: "Acceleration",
+                            data: accData.reverse(),
+                            borderColor: "blue",
+                            backgroundColor: "rgba(0, 0, 255, 0.2)",
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        setInterval(fetchData, 5000); // Fetch every 5 seconds
+        fetchData(); // Initial Fetch
+
+    </script>
 </body>
 </html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wearable Device Live Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #eef2f3;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            color: #007BFF;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 5cm);
+            gap: 1cm;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .data-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 5cm;
+            height: 5cm;
+            background: linear-gradient(135deg, #007BFF, #00D4FF);
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+        .data-box i {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+        .data-box:nth-child(1) i { color: red; }
+        .data-box:nth-child(2) i { color: orange; }
+        .data-box:nth-child(3) i { color: green; }
+        .data-box:nth-child(4) i { color: blue; }
+        .data-box:nth-child(5) i { color: purple; }
+        .data-box:nth-child(6) i { color: red; }
+        .timestamp {
+            font-size: 14px;
+            color: gray;
+            margin-top: 10px;
+        }
+        .emergency {
+            display: none;
+            background: red;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Sensor Data</h1>
+        <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
+        
+        <div class="data-grid">
+            <div class="data-box">
+                <i class="fas fa-heartbeat"></i>
+                <p>Heart Rate</p>
+                <span id="heartRate">Loading...</span> BPM
+            </div>
+            <div class="data-box">
+                <i class="fas fa-arrows-alt-v"></i>
+                <p>Acceleration X</p>
+                <span id="accelX">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-arrows-alt-h"></i>
+                <p>Acceleration Y</p>
+                <span id="accelY">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-compress-alt"></i>
+                <p>Acceleration Z</p>
+                <span id="accelZ">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>GPS Location</p>
+                <span id="gps">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Emergency</p>
+                <span id="emergencyStatus">No Alert</span>
+            </div>
+        </div>
+        
+        <p class="emergency" id="emergencyAlert">🚨 EMERGENCY ALERT! 🚨</p>
+    </div>
+    
+    <script>
+        const apiKey = "JB035BQVNPNCBMKN";
+        const channelID = "2865083";
+        const defaultLat = 10.178180;
+        const defaultLon = 76.431107;
+
+        async function fetchData() {
+            try {
+                const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
+                const data = await response.json();
+
+                document.getElementById("heartRate").innerText = data.field1 || "N/A";
+                document.getElementById("accelX").innerText = data.field2 || "N/A";
+                document.getElementById("accelY").innerText = data.field3 || "N/A";
+                document.getElementById("accelZ").innerText = data.field4 || "N/A";
+                
+                const lat = data.field6 ? data.field6 : defaultLat;
+                const lon = data.field7 ? data.field7 : defaultLon;
+                document.getElementById("gps").innerText = `${lat}, ${lon}`;
+                
+                const emergencyStatus = data.field5 || "0";
+                if (emergencyStatus === "1") {
+                    document.getElementById("emergencyAlert").style.display = "block";
+                    document.getElementById("emergencyStatus").innerText = "ALERT!";
+                } else {
+                    document.getElementById("emergencyAlert").style.display = "none";
+                    document.getElementById("emergencyStatus").innerText = "No Alert";
+                }
+                
+                document.getElementById("timestamp").innerText = new Date(data.created_at).toLocaleString();
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        setInterval(fetchData, 5000);
+        fetchData();
+    </script>
+</body>
+</html>

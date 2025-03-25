@@ -23,19 +23,19 @@
         h1 {
             color: #007BFF;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .data-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background-color: #007BFF;
-            color: white;
+        .data-box img {
+            width: 40px;
+            height: 40px;
         }
         .emergency {
             display: none;
@@ -57,19 +57,40 @@
     <div class="container">
         <h1>Live Sensor Data</h1>
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
-        <table>
-            <tr>
-                <th>Heart Rate (BPM)</th>
-                <th>Accel X</th>
-                <th>Accel Y</th>
-                <th>Accel Z</th>
-                <th>GPS Location</th>
-                <th>Emergency Status</th>
-            </tr>
-            <tbody id="dataTable"></tbody>
-        </table>
+        
+        <div class="data-box">
+            <img src="heart.png" alt="Heart Rate">
+            <p>Heart Rate: <span id="heartRate">Loading...</span> BPM</p>
+        </div>
+        
+        <div class="data-box">
+            <img src="accel.png" alt="Acceleration">
+            <p>Acceleration X: <span id="accelX">Loading...</span></p>
+        </div>
+        
+        <div class="data-box">
+            <img src="accel.png" alt="Acceleration">
+            <p>Acceleration Y: <span id="accelY">Loading...</span></p>
+        </div>
+        
+        <div class="data-box">
+            <img src="accel.png" alt="Acceleration">
+            <p>Acceleration Z: <span id="accelZ">Loading...</span></p>
+        </div>
+        
+        <div class="data-box">
+            <img src="gps.png" alt="GPS">
+            <p>GPS Location: <span id="gps">Loading...</span></p>
+        </div>
+        
+        <div class="data-box">
+            <img src="alert.png" alt="Emergency">
+            <p>Emergency Status: <span id="emergencyStatus">No Alert</span></p>
+        </div>
+        
         <p class="emergency" id="emergencyAlert">🚨 EMERGENCY ALERT! 🚨</p>
     </div>
+    
     <script>
         const apiKey = "JB035BQVNPNCBMKN";
         const channelID = "2865083";
@@ -78,30 +99,28 @@
 
         async function fetchData() {
             try {
-                const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=10`);
+                const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
                 const data = await response.json();
-                const tableBody = document.getElementById("dataTable");
-                tableBody.innerHTML = "";
-                data.feeds.forEach(feed => {
-                    const timestamp = new Date(feed.created_at).toLocaleString();
-                    const lat = feed.field6 ? feed.field6 : defaultLat;
-                    const lon = feed.field7 ? feed.field7 : defaultLon;
-                    const emergencyStatus = feed.field5 === "1" ? "ALERT!" : "No Alert";
-                    const emergencyClass = feed.field5 === "1" ? "block" : "none";
 
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${feed.field1 || "N/A"}</td>
-                            <td>${feed.field2 || "N/A"}</td>
-                            <td>${feed.field3 || "N/A"}</td>
-                            <td>${feed.field4 || "N/A"}</td>
-                            <td>${lat}, ${lon}</td>
-                            <td>${emergencyStatus}</td>
-                        </tr>
-                    `;
-                    document.getElementById("timestamp").innerText = timestamp;
-                    document.getElementById("emergencyAlert").style.display = emergencyClass;
-                });
+                document.getElementById("heartRate").innerText = data.field1 || "N/A";
+                document.getElementById("accelX").innerText = data.field2 || "N/A";
+                document.getElementById("accelY").innerText = data.field3 || "N/A";
+                document.getElementById("accelZ").innerText = data.field4 || "N/A";
+                
+                const lat = data.field6 ? data.field6 : defaultLat;
+                const lon = data.field7 ? data.field7 : defaultLon;
+                document.getElementById("gps").innerText = `${lat}, ${lon}`;
+                
+                const emergencyStatus = data.field5 || "0";
+                if (emergencyStatus === "1") {
+                    document.getElementById("emergencyAlert").style.display = "block";
+                    document.getElementById("emergencyStatus").innerText = "ALERT!";
+                } else {
+                    document.getElementById("emergencyAlert").style.display = "none";
+                    document.getElementById("emergencyStatus").innerText = "No Alert";
+                }
+                
+                document.getElementById("timestamp").innerText = new Date(data.created_at).toLocaleString();
             } catch (error) {
                 console.error("Error fetching data:", error);
             }

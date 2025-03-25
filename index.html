@@ -3,146 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sensor Data</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Wearable Device Live Data</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: #eef2f3;
+            color: #333;
         }
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        canvas {
+        .container {
+            width: 90%;
             max-width: 600px;
             margin: 20px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            color: #007BFF;
+        }
+        .data {
+            font-size: 18px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+        .emergency {
+            display: none;
+            background: red;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .timestamp {
+            font-size: 14px;
+            color: gray;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-
-    <h2>📡 Live Sensor Data from ThingSpeak</h2>
-
-    <p><strong>💓 Heart Rate:</strong> <span id="heartRate">Loading...</span> BPM</p>
-    <p><strong>📊 Accelerometer Data:</strong> <span id="accelerometer">Loading...</span></p>
-    <p><strong>📍 GPS Location:</strong> <span id="gps">Loading...</span></p>
-
-    <h3>📜 Last 10 Sensor Readings</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Heart Rate (BPM)</th>
-                <th>Acceleration</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-            </tr>
-        </thead>
-        <tbody id="dataTable">
-            <tr><td colspan="5">Fetching Data...</td></tr>
-        </tbody>
-    </table>
-
-    <h3>📈 Recent Data Chart</h3>
-    <canvas id="myChart"></canvas>
-
+    <div class="container">
+        <h1>Live Sensor Data</h1>
+        <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
+        <p class="data">❤️ Heart Rate: <span id="heartRate">Loading...</span> BPM</p>
+        <p class="data">📡 Acceleration X: <span id="accelX">Loading...</span></p>
+        <p class="data">📡 Acceleration Y: <span id="accelY">Loading...</span></p>
+        <p class="data">📡 Acceleration Z: <span id="accelZ">Loading...</span></p>
+        <p class="data">📍 GPS Location: <span id="gps">Loading...</span></p>
+        <p class="data">⚠️ Emergency Button: <span id="emergencyStatus">No Alert</span></p>
+        <p class="emergency" id="emergencyAlert">🚨 EMERGENCY ALERT! 🚨</p>
+    </div>
     <script>
-        const channelID = 2865083;
-        const apiKey = "JB035BQVNPNCBMKN"; // Read API Key
-        let chart;
-        
+        const apiKey = "JB035BQVNPNCBMKN";
+        const channelID = "2865083";
+        const defaultLat = 10.178180;
+        const defaultLon = 76.431107;
+
         async function fetchData() {
-            const lastEntryURL = `https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`;
-            const historyURL = `https://api.thingspeak.com/channels/${channelID}/feeds.json?results=10&api_key=${apiKey}`;
-
             try {
-                // Fetch Latest Data
-                const lastResponse = await fetch(lastEntryURL);
-                const lastData = await lastResponse.json();
+                const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
+                const data = await response.json();
+                const timestamp = new Date(data.created_at).toLocaleString();
 
-                // Display Latest Data
-                document.getElementById("heartRate").innerText = lastData.field1;
-                document.getElementById("accelerometer").innerText = lastData.field2;
-                document.getElementById("gps").innerText = `Lat: ${lastData.field3}, Lon: ${lastData.field4}`;
-
-                // Fetch Last 10 Entries
-                const historyResponse = await fetch(historyURL);
-                const historyData = await historyResponse.json();
-
-                // Update Table
-                let tableBody = document.getElementById("dataTable");
-                tableBody.innerHTML = "";
-                let labels = [], heartRateData = [], accData = [];
-
-                historyData.feeds.forEach(feed => {
-                    labels.push(feed.created_at.slice(11, 19)); // Get time from timestamp
-                    heartRateData.push(feed.field1);
-                    accData.push(feed.field2);
-
-                    let row = `<tr>
-                        <td>${feed.created_at}</td>
-                        <td>${feed.field1}</td>
-                        <td>${feed.field2}</td>
-                        <td>${feed.field3}</td>
-                        <td>${feed.field4}</td>
-                    </tr>`;
-                    tableBody.innerHTML += row;
-                });
-
-                updateChart(labels, heartRateData, accData);
-
+                document.getElementById("timestamp").innerText = timestamp || "N/A";
+                document.getElementById("heartRate").innerText = data.field1 || "N/A";
+                document.getElementById("accelX").innerText = data.field2 || "N/A";
+                document.getElementById("accelY").innerText = data.field3 || "N/A";
+                document.getElementById("accelZ").innerText = data.field4 || "N/A";
+                
+                const lat = data.field6 ? data.field6 : defaultLat;
+                const lon = data.field7 ? data.field7 : defaultLon;
+                document.getElementById("gps").innerText = `${lat}, ${lon}`;
+                
+                const emergencyStatus = data.field5 || "0";
+                if (emergencyStatus === "1") {
+                    document.getElementById("emergencyAlert").style.display = "block";
+                    document.getElementById("emergencyStatus").innerText = "ALERT!";
+                } else {
+                    document.getElementById("emergencyAlert").style.display = "none";
+                    document.getElementById("emergencyStatus").innerText = "No Alert";
+                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
-
-        function updateChart(labels, heartRateData, accData) {
-            let ctx = document.getElementById('myChart').getContext('2d');
-            if (chart) chart.destroy();
-
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels.reverse(),
-                    datasets: [
-                        {
-                            label: "Heart Rate (BPM)",
-                            data: heartRateData.reverse(),
-                            borderColor: "red",
-                            backgroundColor: "rgba(255, 0, 0, 0.2)",
-                            fill: true
-                        },
-                        {
-                            label: "Acceleration",
-                            data: accData.reverse(),
-                            borderColor: "blue",
-                            backgroundColor: "rgba(0, 0, 255, 0.2)",
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        setInterval(fetchData, 5000); // Fetch every 5 seconds
-        fetchData(); // Initial Fetch
-
+        setInterval(fetchData, 5000);
+        fetchData();
     </script>
 </body>
 </html>

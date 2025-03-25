@@ -23,19 +23,35 @@
         h1 {
             color: #007BFF;
         }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 3cm);
+            gap: 1cm;
+            justify-content: center;
+            margin-top: 20px;
+        }
         .data-box {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            width: 3cm;
+            height: 3cm;
             background: white;
-            padding: 15px;
-            margin: 10px 0;
+            padding: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            border-radius: 15px;
+            text-align: center;
         }
         .data-box img {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
+            margin-bottom: 5px;
+        }
+        .timestamp {
+            font-size: 14px;
+            color: gray;
+            margin-top: 10px;
         }
         .emergency {
             display: none;
@@ -46,11 +62,6 @@
             border-radius: 5px;
             margin-top: 10px;
         }
-        .timestamp {
-            font-size: 14px;
-            color: gray;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -58,34 +69,37 @@
         <h1>Live Sensor Data</h1>
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
         
-        <div class="data-box">
-            <img src="heart.png" alt="Heart Rate">
-            <p>Heart Rate: <span id="heartRate">Loading...</span> BPM</p>
-        </div>
-        
-        <div class="data-box">
-            <img src="accel.png" alt="Acceleration">
-            <p>Acceleration X: <span id="accelX">Loading...</span></p>
-        </div>
-        
-        <div class="data-box">
-            <img src="accel.png" alt="Acceleration">
-            <p>Acceleration Y: <span id="accelY">Loading...</span></p>
-        </div>
-        
-        <div class="data-box">
-            <img src="accel.png" alt="Acceleration">
-            <p>Acceleration Z: <span id="accelZ">Loading...</span></p>
-        </div>
-        
-        <div class="data-box">
-            <img src="gps.png" alt="GPS">
-            <p>GPS Location: <span id="gps">Loading...</span></p>
-        </div>
-        
-        <div class="data-box">
-            <img src="alert.png" alt="Emergency">
-            <p>Emergency Status: <span id="emergencyStatus">No Alert</span></p>
+        <div class="data-grid">
+            <div class="data-box">
+                <img src="heart.png" alt="Heart Rate">
+                <p>Heart Rate</p>
+                <span id="heartRate">Loading...</span> BPM
+            </div>
+            <div class="data-box">
+                <img src="accel.png" alt="Acceleration">
+                <p>Acceleration X</p>
+                <span id="accelX">Loading...</span>
+            </div>
+            <div class="data-box">
+                <img src="accel.png" alt="Acceleration">
+                <p>Acceleration Y</p>
+                <span id="accelY">Loading...</span>
+            </div>
+            <div class="data-box">
+                <img src="accel.png" alt="Acceleration">
+                <p>Acceleration Z</p>
+                <span id="accelZ">Loading...</span>
+            </div>
+            <div class="data-box">
+                <img src="gps.png" alt="GPS">
+                <p>GPS Location</p>
+                <span id="gps">Loading...</span>
+            </div>
+            <div class="data-box">
+                <img src="alert.png" alt="Emergency">
+                <p>Emergency</p>
+                <span id="emergencyStatus">No Alert</span>
+            </div>
         </div>
         
         <p class="emergency" id="emergencyAlert">🚨 EMERGENCY ALERT! 🚨</p>

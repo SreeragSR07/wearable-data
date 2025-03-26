@@ -48,7 +48,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            height: 300px;
+            height: 200px;
             transition: all 0.3s ease;
         }
         .data-box:hover {
@@ -56,17 +56,17 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
         .data-box i {
-            font-size: 100px;
-            margin-bottom: 15px;
+            font-size: 50px;
+            margin-bottom: 10px;
             color: #2F80ED;
         }
         .data-box p {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 500;
             margin: 0 0 10px 0;
         }
         .data-box span {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 600;
         }
         .timestamp {
@@ -89,14 +89,24 @@
         
         <div class="data-grid">
             <div class="data-box">
-                <i class="fas fa-heartbeat"></i>
+                <i class="fas fa-heart"></i>
                 <p>Heart Rate</p>
                 <span id="heartRate">Loading...</span>
             </div>
             <div class="data-box">
-                <i class="fas fa-ruler-combined"></i>
-                <p>Accelerometer</p>
-                <span id="accelerometer">Loading...</span>
+                <i class="fas fa-arrows-alt-h"></i>
+                <p>Accelerometer X</p>
+                <span id="accelX">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-arrows-alt-v"></i>
+                <p>Accelerometer Y</p>
+                <span id="accelY">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-compress-alt"></i>
+                <p>Accelerometer Z</p>
+                <span id="accelZ">Loading...</span>
             </div>
             <div class="data-box">
                 <i class="fas fa-map-marker-alt"></i>
@@ -124,7 +134,9 @@
                 const data = await response.json();
                 
                 document.getElementById("heartRate").textContent = data.field1 || "N/A";
-                document.getElementById("accelerometer").textContent = `X: ${data.field2 || "N/A"}, Y: ${data.field3 || "N/A"}, Z: ${data.field4 || "N/A"}`;
+                document.getElementById("accelX").textContent = data.field2 || "N/A";
+                document.getElementById("accelY").textContent = data.field3 || "N/A";
+                document.getElementById("accelZ").textContent = data.field4 || "N/A";
                 document.getElementById("gpsLocation").textContent = `${data.field6 || "N/A"}, ${data.field7 || "N/A"}`;
                 document.getElementById("batteryStatus").textContent = data.field8 || "N/A";
                 

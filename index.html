@@ -7,26 +7,22 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
         
-        :root {
-            --box-size: 11cm; /* Adjusted for 36cm screen */
-            --icon-size: 4cm;
-            --font-scale: 0.9;
-        }
-        
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f5f7fa;
             color: #333;
             margin: 0;
-            padding: 0.5cm;
+            padding: 10px;
             width: 36cm;
             height: 36cm;
             box-sizing: border-box;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .container {
-            width: 100%;
-            height: 100%;
+            width: 34cm;
+            height: 34cm;
             display: flex;
             flex-direction: column;
         }
@@ -35,48 +31,41 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin: 0.5cm 0;
+            margin: 0.3cm 0;
             font-weight: 600;
-            font-size: calc(28px * var(--font-scale));
+            font-size: 24px;
             text-align: center;
-            flex-shrink: 0;
         }
         .data-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.8cm;
+            gap: 0.6cm;
             width: 100%;
-            height: calc(36cm - 3cm);
-            padding: 0.5cm;
-            box-sizing: border-box;
+            height: 30cm;
         }
         .data-box {
             display: flex;
-            width: 100%;
-            height: 100%;
-            padding: 0.5cm;
-            border-radius: 0.6cm;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0.2cm 0.4cm rgba(0, 0, 0, 0.08);
+            padding: 0.4cm;
+            border-radius: 0.5cm;
+            box-shadow: 0 0.1cm 0.3cm rgba(0, 0, 0, 0.08);
             background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,245,245,0.95));
             border: 1px solid rgba(255,255,255,0.3);
+            align-items: center;
         }
         .icon-container {
+            width: 2.2cm;
+            height: 2.2cm;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: var(--icon-size);
-            height: var(--icon-size);
-            margin-right: 0.5cm;
+            margin-right: 0.4cm;
         }
         .icon-symbol {
-            font-size: var(--icon-size);
+            font-size: 2cm;
             background: linear-gradient(135deg, #87CEEB, #1E90FF);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            filter: drop-shadow(0 0.1cm 0.2cm rgba(0, 0, 0, 0.15));
         }
         .content {
             display: flex;
@@ -85,16 +74,16 @@
             flex: 1;
         }
         .data-box p {
-            font-size: calc(22px * var(--font-scale));
+            font-size: 16px;
             font-weight: 500;
-            margin: 0 0 0.3cm 0;
+            margin: 0 0 0.2cm 0;
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
         .data-box span {
-            font-size: calc(36px * var(--font-scale));
+            font-size: 24px;
             font-weight: 600;
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
@@ -102,14 +91,12 @@
             color: transparent;
         }
         .timestamp {
-            font-size: calc(16px * var(--font-scale));
+            font-size: 14px;
             color: #7f8c8d;
             text-align: center;
-            flex-shrink: 0;
             margin-top: 0.3cm;
         }
         
-        /* Emergency state */
         .emergency-active {
             animation: pulse 1.5s infinite;
             border: 2px solid #ff4b2b;
@@ -121,9 +108,9 @@
         }
         
         .unit {
-            font-size: calc(18px * var(--font-scale));
+            font-size: 14px;
             color: #7f8c8d;
-            margin-left: 0.2cm;
+            margin-left: 0.1cm;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

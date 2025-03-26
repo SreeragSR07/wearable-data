@@ -10,69 +10,63 @@
             text-align: center;
             background-color: #eef2f3;
             color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
         }
         .container {
             width: 90%;
-            max-width: 800px;
-            margin: 20px auto;
-            background: white;
+            max-width: 1000px;
             padding: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
         }
         h1 {
             color: #007BFF;
+            margin-bottom: 20px;
         }
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(3, 5cm);
-            gap: 1cm;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             justify-content: center;
-            margin-top: 20px;
         }
         .data-box {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 5cm;
-            height: 5cm;
-            background: linear-gradient(135deg, #1a1a1a, #4d4d4d);
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #222, #555);
+            padding: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
             text-align: center;
             color: white;
             position: relative;
         }
         .data-box i {
-            font-size: 5cm;
-            position: absolute;
-            opacity: 0.2;
+            font-size: 100px;
+            opacity: 0.8;
+            margin-bottom: 10px;
         }
         .data-box p, .data-box span {
             position: relative;
             z-index: 2;
+            font-size: 24px;
         }
         .data-box:nth-child(1) i { color: red; }
         .data-box:nth-child(2) i { color: orange; }
         .data-box:nth-child(3) i { color: green; }
         .data-box:nth-child(4) i { color: blue; }
-        .data-box:nth-child(5) i { color: gold; }
-        .data-box:nth-child(6) i { color: red; }
+        .data-box:nth-child(5) i { color: purple; }
+        .data-box:nth-child(6) i { color: yellow; }
         .timestamp {
-            font-size: 14px;
+            font-size: 16px;
             color: gray;
-            margin-top: 10px;
-        }
-        .emergency {
-            display: none;
-            background: red;
-            color: white;
-            padding: 15px;
-            font-weight: bold;
-            border-radius: 5px;
-            margin-top: 10px;
+            margin-top: 20px;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" crossorigin="anonymous"></script>
@@ -89,21 +83,6 @@
                 <span id="heartRate">Loading...</span> BPM
             </div>
             <div class="data-box">
-                <i class="fas fa-arrows-alt-v"></i>
-                <p>Acceleration X</p>
-                <span id="accelX">Loading...</span>
-            </div>
-            <div class="data-box">
-                <i class="fas fa-arrows-alt-h"></i>
-                <p>Acceleration Y</p>
-                <span id="accelY">Loading...</span>
-            </div>
-            <div class="data-box">
-                <i class="fas fa-compress-alt"></i>
-                <p>Acceleration Z</p>
-                <span id="accelZ">Loading...</span>
-            </div>
-            <div class="data-box">
                 <i class="fas fa-map-marker-alt"></i>
                 <p>GPS Location</p>
                 <span id="gps">Loading...</span>
@@ -113,9 +92,22 @@
                 <p>Emergency</p>
                 <span id="emergencyStatus">No Alert</span>
             </div>
+            <div class="data-box">
+                <i class="fas fa-wave-square"></i>
+                <p>Acceleration X</p>
+                <span id="accelX">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-wave-square"></i>
+                <p>Acceleration Y</p>
+                <span id="accelY">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-wave-square"></i>
+                <p>Acceleration Z</p>
+                <span id="accelZ">Loading...</span>
+            </div>
         </div>
-        
-        <p class="emergency" id="emergencyAlert">🚨 EMERGENCY ALERT! 🚨</p>
     </div>
     
     <script>
@@ -139,13 +131,7 @@
                 document.getElementById("gps").innerText = `${lat}, ${lon}`;
                 
                 const emergencyStatus = data.field5 || "0";
-                if (emergencyStatus === "1") {
-                    document.getElementById("emergencyAlert").style.display = "block";
-                    document.getElementById("emergencyStatus").innerText = "ALERT!";
-                } else {
-                    document.getElementById("emergencyAlert").style.display = "none";
-                    document.getElementById("emergencyStatus").innerText = "No Alert";
-                }
+                document.getElementById("emergencyStatus").innerText = emergencyStatus === "1" ? "ALERT!" : "No Alert";
                 
                 document.getElementById("timestamp").innerText = new Date(data.created_at).toLocaleString();
             } catch (error) {

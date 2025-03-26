@@ -23,7 +23,10 @@
             max-width: 1400px;
         }
         h1 {
-            color: #2c3e50;
+            background: linear-gradient(to right, #000000, #434343);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             margin-bottom: 30px;
             font-weight: 600;
             font-size: 2.5rem;
@@ -51,10 +54,6 @@
             background: white;
             border: 1px solid #e0e0e0;
         }
-        .heart-rate-box {
-            background: linear-gradient(135deg, #87CEEB, #1E90FF);
-            color: white;
-        }
         .data-box:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
@@ -63,28 +62,19 @@
             position: relative;
             z-index: 2;
             margin-bottom: 20px;
-            height: 120px;
-            width: 120px;
+            height: 150px;
+            width: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .heart-icon {
-            font-size: 100px;
-            color: white;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-        }
-        .data-box img {
-            height: 100%;
-            width: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1)) 
-                    brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1458%) hue-rotate(195deg) brightness(97%) contrast(101%);
-        }
-        .heart-rate-box p,
-        .heart-rate-box span {
-            color: white;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        .icon-symbol {
+            font-size: 140px;
+            background: linear-gradient(135deg, #87CEEB, #1E90FF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
         }
         .data-box p {
             position: relative;
@@ -92,14 +82,20 @@
             font-size: 24px;
             font-weight: 500;
             margin: 15px 0 10px 0;
-            color: #2c3e50;
+            background: linear-gradient(to right, #000000, #434343);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
         .data-box span {
             position: relative;
             z-index: 2;
             font-size: 42px;
             font-weight: 600;
-            color: #2c3e50;
+            background: linear-gradient(to right, #000000, #434343);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
         .timestamp {
             font-size: 16px;
@@ -113,10 +109,6 @@
             animation: pulse 1.5s infinite;
             border: 2px solid #ff4b2b;
         }
-        .emergency-active img {
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1)) 
-                    brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1458%) hue-rotate(347deg) brightness(97%) contrast(101%);
-        }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.02); }
@@ -128,9 +120,6 @@
             color: #7f8c8d;
             margin-left: 5px;
         }
-        .heart-unit {
-            color: rgba(255,255,255,0.8);
-        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -140,44 +129,44 @@
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
         
         <div class="data-grid">
-            <div class="data-box heart-rate-box">
+            <div class="data-box">
                 <div class="icon-container">
-                    <i class="fas fa-heart heart-icon"></i>
+                    <i class="fas fa-heart icon-symbol"></i>
                 </div>
                 <p>Heart Rate</p>
-                <span id="heartRate">--</span><span class="unit heart-unit">BPM</span>
+                <span id="heartRate">--</span><span class="unit">BPM</span>
             </div>
             <div class="data-box">
                 <div class="icon-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/447/447031.png" alt="GPS">
+                    <i class="fas fa-map-marker-alt icon-symbol"></i>
                 </div>
                 <p>GPS Location</p>
                 <span id="gps">--</span>
             </div>
             <div class="data-box" id="emergencyBox">
                 <div class="icon-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/455/455604.png" alt="Emergency">
+                    <i class="fas fa-exclamation-triangle icon-symbol"></i>
                 </div>
                 <p>Emergency Status</p>
                 <span id="emergencyStatus">Normal</span>
             </div>
             <div class="data-box">
                 <div class="icon-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3161/3161837.png" alt="X-Axis">
+                    <i class="fas fa-arrows-alt-h icon-symbol"></i>
                 </div>
                 <p>Acceleration X</p>
                 <span id="accelX">--</span><span class="unit">m/s²</span>
             </div>
             <div class="data-box">
                 <div class="icon-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3161/3161837.png" alt="Y-Axis" style="transform: rotate(90deg);">
+                    <i class="fas fa-arrows-alt-v icon-symbol"></i>
                 </div>
                 <p>Acceleration Y</p>
                 <span id="accelY">--</span><span class="unit">m/s²</span>
             </div>
             <div class="data-box">
                 <div class="icon-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3161/3161837.png" alt="Z-Axis" style="transform: rotate(45deg);">
+                    <i class="fas fa-arrow-up icon-symbol"></i>
                 </div>
                 <p>Acceleration Z</p>
                 <span id="accelZ">--</span><span class="unit">m/s²</span>

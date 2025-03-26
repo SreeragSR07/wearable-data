@@ -65,6 +65,10 @@
             background-color: #ffebee;
             border: 2px solid #ff4b2b;
         }
+        .sos-active {
+            background-color: #ffebee;
+            border: 2px solid #ff4b2b;
+        }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(255,75,43,0.4); }
             70% { box-shadow: 0 0 0 15px rgba(255,75,43,0); }
@@ -113,9 +117,9 @@
             
             <div class="data-box" id="sosBox">
                 <i class="fas fa-bell"></i>
-                <p>Emergency</p>
-                <button class="sos-button" id="sosButton">SOS</button>
-                <span id="sosStatus">Ready</span>
+                <p>Emergency SOS</p>
+                <button class="sos-button" id="sosButton">PRESS FOR SOS</button>
+                <span id="sosStatus">System Ready</span>
             </div>
             
             <div class="data-box">
@@ -132,43 +136,74 @@
             
             <div class="data-box" id="alertBox">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Alerts</p>
-                <span id="alerts">All normal</span>
+                <p>Automatic Alerts</p>
+                <span id="alerts">All systems normal</span>
             </div>
         </div>
     </div>
 
-    <script>
-        // Initialize with sample data
-        const updateData = () => {
-            // This would be replaced with real API calls
-            document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
-            
-            // Sample emergency detection
-            if (Math.random() > 0.8) {
-                document.getElementById('alertBox').classList.add('emergency');
-                document.getElementById('alerts').textContent = 'Fall detected!';
-            } else {
-                document.getElementById('alertBox').classList.remove('emergency');
-                document.getElementById('alerts').textContent = 'All normal';
-            }
-        };
+    <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
 
-        // SOS button functionality
-        document.getElementById('sosButton').addEventListener('click', () => {
-            document.getElementById('sosBox').classList.add('emergency');
-            document.getElementById('sosStatus').textContent = 'ACTIVATED!';
-            alert('Emergency SOS activated!');
+    <script>
+        // SOS state control
+        let isSOSActive = false;
+        const sosButton = document.getElementById('sosButton');
+        const sosBox = document.getElementById('sosBox');
+        const sosStatus = document.getElementById('sosStatus');
+        
+        // SOS button functionality - ONLY this controls SOS state
+        sosButton.addEventListener('click', () => {
+            isSOSActive = !isSOSActive; // Toggle state
+            
+            if (isSOSActive) {
+                sosBox.classList.add('sos-active');
+                sosStatus.textContent = 'SOS ACTIVATED!';
+                document.getElementById('alertSound').play();
+            } else {
+                sosBox.classList.remove('sos-active');
+                sosStatus.textContent = 'System Ready';
+            }
         });
+
+        // Other emergency detection (doesn't affect SOS)
+        const checkAutomaticAlerts = () => {
+            const alertBox = document.getElementById('alertBox');
+            const alertsText = document.getElementById('alerts');
+            
+            // Simulate random sensor readings
+            const heartRate = 70 + Math.floor(Math.random() * 30);
+            const accelX = (Math.random() * 20).toFixed(2);
+            const accelY = (Math.random() * 20).toFixed(2);
+            
+            document.getElementById('heartRate').textContent = heartRate;
+            document.getElementById('accelX').textContent = accelX;
+            document.getElementById('accelY').textContent = accelY;
+            
+            // Check for automatic alerts (never affects SOS state)
+            const alertMessages = [];
+            if (heartRate > 100) alertMessages.push("High heart rate");
+            if (heartRate < 50) alertMessages.push("Low heart rate");
+            if (accelX > 15 || accelY > 15) alertMessages.push("High impact");
+            
+            if (alertMessages.length > 0) {
+                alertBox.classList.add('emergency');
+                alertsText.textContent = alertMessages.join(' + ');
+            } else {
+                alertBox.classList.remove('emergency');
+                alertsText.textContent = 'All systems normal';
+            }
+            
+            document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+        };
 
         // Map button functionality
         document.getElementById('mapButton').addEventListener('click', () => {
             window.open('https://www.google.com/maps?q=10.17818,76.43110');
         });
 
-        // Update data every 3 seconds
-        updateData();
-        setInterval(updateData, 3000);
+        // Update data every 3 seconds (doesn't affect SOS state)
+        checkAutomaticAlerts();
+        setInterval(checkAutomaticAlerts, 3000);
     </script>
 </body>
 </html>

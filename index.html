@@ -12,7 +12,7 @@
             background-color: #f5f7fa;
             color: #333;
             margin: 0;
-            padding: 10px;
+            padding: 0.5cm;
             width: 36cm;
             height: 36cm;
             box-sizing: border-box;
@@ -21,8 +21,8 @@
             align-items: center;
         }
         .container {
-            width: 34cm;
-            height: 34cm;
+            width: 35cm;
+            height: 35cm;
             display: flex;
             flex-direction: column;
         }
@@ -31,37 +31,41 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin: 0.3cm 0;
+            margin: 0.2cm 0 0.5cm 0;
             font-weight: 600;
-            font-size: 24px;
+            font-size: 1.8cm;
             text-align: center;
         }
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.6cm;
-            width: 100%;
-            height: 30cm;
+            grid-template-columns: repeat(3, 10cm);
+            grid-template-rows: repeat(2, 10cm);
+            gap: 0.5cm;
+            width: 31.5cm; /* 3 boxes × 10cm + 2 gaps × 0.5cm */
+            height: 20.5cm; /* 2 boxes × 10cm + 1 gap × 0.5cm */
+            margin: 0 auto;
         }
         .data-box {
-            display: flex;
-            padding: 0.4cm;
+            width: 10cm;
+            height: 10cm;
+            padding: 0.5cm;
             border-radius: 0.5cm;
-            box-shadow: 0 0.1cm 0.3cm rgba(0, 0, 0, 0.08);
+            box-shadow: 0 0.1cm 0.2cm rgba(0, 0, 0, 0.1);
             background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,245,245,0.95));
             border: 1px solid rgba(255,255,255,0.3);
+            display: flex;
             align-items: center;
         }
         .icon-container {
-            width: 2.2cm;
-            height: 2.2cm;
+            width: 3.5cm;
+            height: 3.5cm;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 0.4cm;
+            margin-right: 0.5cm;
         }
         .icon-symbol {
-            font-size: 2cm;
+            font-size: 3.5cm;
             background: linear-gradient(135deg, #87CEEB, #1E90FF);
             -webkit-background-clip: text;
             background-clip: text;
@@ -74,7 +78,7 @@
             flex: 1;
         }
         .data-box p {
-            font-size: 16px;
+            font-size: 0.7cm;
             font-weight: 500;
             margin: 0 0 0.2cm 0;
             background: linear-gradient(to right, #000000, #434343);
@@ -83,7 +87,7 @@
             color: transparent;
         }
         .data-box span {
-            font-size: 24px;
+            font-size: 1cm;
             font-weight: 600;
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
@@ -91,10 +95,10 @@
             color: transparent;
         }
         .timestamp {
-            font-size: 14px;
+            font-size: 0.5cm;
             color: #7f8c8d;
             text-align: center;
-            margin-top: 0.3cm;
+            margin-top: 0.5cm;
         }
         
         .emergency-active {
@@ -108,7 +112,7 @@
         }
         
         .unit {
-            font-size: 14px;
+            font-size: 0.5cm;
             color: #7f8c8d;
             margin-left: 0.1cm;
         }

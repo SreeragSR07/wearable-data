@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wearable Device Live Data</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,10 +58,7 @@
         .data-box i {
             font-size: 100px;
             margin-bottom: 15px;
-            background: linear-gradient(135deg, #56CCF2, #2F80ED);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #2F80ED;
         }
         .data-box p {
             font-size: 22px;
@@ -75,6 +73,12 @@
             font-size: 16px;
             color: #7f8c8d;
             margin-top: 25px;
+        }
+        .data-box a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 18px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -98,6 +102,7 @@
                 <i class="fas fa-map-marker-alt"></i>
                 <p>GPS Location</p>
                 <span id="gpsLocation">Loading...</span>
+                <a id="gpsLink" href="#" target="_blank">View on Map</a>
             </div>
             <div class="data-box">
                 <i class="fas fa-battery-half"></i>
@@ -123,13 +128,22 @@
                 document.getElementById("gpsLocation").textContent = `${data.field6 || "N/A"}, ${data.field7 || "N/A"}`;
                 document.getElementById("batteryStatus").textContent = data.field8 || "N/A";
                 
+                let gpsLat = data.field6;
+                let gpsLon = data.field7;
+                if (gpsLat && gpsLon) {
+                    document.getElementById("gpsLink").href = `https://www.google.com/maps?q=${gpsLat},${gpsLon}`;
+                    document.getElementById("gpsLink").style.display = "block";
+                } else {
+                    document.getElementById("gpsLink").style.display = "none";
+                }
+                
                 let emergencyMessage = "Normal";
                 if (data.field5 === "1") {
-                    emergencyMessage = "MANUAL SOS!";
+                    emergencyMessage = "🚨 MANUAL SOS!";
                 } else if (data.field8 === "1") {
-                    emergencyMessage = "BATTERY CRITICAL!";
+                    emergencyMessage = "⚡ BATTERY CRITICAL!";
                 } else if (data.field1 && (data.field1 < 50 || data.field1 > 150)) {
-                    emergencyMessage = "HEART RATE ALERT!";
+                    emergencyMessage = "💓 HEART RATE ALERT!";
                 }
                 document.getElementById("emergencyStatus").textContent = emergencyMessage;
                 

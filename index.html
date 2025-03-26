@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wearable Device Live Data</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            justify-content: center;
+        }
+        .data-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            height: 300px;
+            transition: all 0.3s ease;
+        }
+        .data-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .data-box i {
+            font-size: 100px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #56CCF2, #2F80ED);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .data-box p {
+            font-size: 22px;
+            font-weight: 500;
+            margin: 0 0 10px 0;
+        }
+        .data-box span {
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .timestamp {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-top: 25px;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        /* ... (rest of your CSS remains the same) ... */
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Live Sensor Data Dashboard</h1>
+        <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
+        <div id="errorDisplay" class="error-message"></div>
+        
+        <div class="data-grid">
+            <!-- ... (your data boxes remain the same) ... -->
+        </div>
+    </div>
+    
+    <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
+    
+    <script>
+        // Test Data - Remove this in production
+        const testData = {
+            field1: "72",  // Heart rate
+            field2: "0.12", // Accel X
+            field3: "0.98", // Accel Y
+            field4: "9.81", // Accel Z
+            field5: "0",    // Manual SOS
+            field6: "10.178180", // Latitude
+            field7: "76.431107", // Longitude
+            field8: "0",     // Battery status
+            created_at: new Date().toISOString()
+        };
+
+        const apiKey = "JB035BQVNPNCBMKN";
+        const channelID = "2865083";
+        const defaultLat = 10.178180;
+        const defaultLon = 76.431107;
+        let alertPlaying = false;
+        let useTestData = false; // Set to true for testing without API
+
+        function displayError(message) {
+            const errorDisplay = document.getElementById("errorDisplay");
+            errorDisplay.textContent = message;
+            console.error(message);
+        }
+
+        function clearError() {
+            document.getElementById("errorDisplay").textContent = "";
+        }
+
+        async function fetchData() {
+            try {
+                clearError();
+                
+                let data;
+                if (useTestData) {
+                    data = testData;
+                    displayError("Using test data - API not connected");
+                } else {
+                    const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    data = await response.json();
+                    
+                    if (!data || Object.keys(data).length === 0) {
+                        useTestData = true;
+                        throw new Error("No data received from API - using test data");
+                    }
+                }
+
+                // Update data fields with fallback values
+                document.getElementById("heartRate").textContent = data.field1 || "--";
+                document.getElementById("accelX").textContent = data.field2 ? parseFloat(data.field2).toFixed(2) : "--";
+                document.getElementById("accelY").textContent = data.field3 ? parseFloat(data.field3).toFixed(2) : "--";
+                document.getElementById("accelZ").textContent = data.field4 ? parseFloat(data.field4).toFixed(2) : "--";
+                
+                // Update GPS with fallback to default
+                const lat = data.field6 ? parseFloat(data.field6).toFixed(6) : defaultLat;
+                const lon = data.field7 ? parseFloat(data.field7).toFixed(6) : defaultLon;
+                document.getElementById("gps").textContent = `${lat}, ${lon}`;
+                document.getElementById("locationButton").onclick = () => {
+                    window.open(`https://www.google.com/maps?q=${lat},${lon}`, "_blank");
+                };
+                
+                // Update emergency status
+                updateEmergencyStatus(data);
+                
+                // Update timestamp
+                document.getElementById("timestamp").textContent = data.created_at ? 
+                    new Date(data.created_at).toLocaleString() : "Not available";
+                    
+            } catch (error) {
+                displayError(`Error: ${error.message}. Trying again in 5 seconds...`);
+                console.error("Fetch error:", error);
+                
+                // If API fails, use test data for visualization
+                if (!useTestData) {
+                    useTestData = true;
+                    fetchData(); // Immediately retry with test data
+                }
+            }
+        }
+
+        function updateEmergencyStatus(data) {
+            const emergencyBox = document.getElementById("emergencyBox");
+            const emergencyElement = document.getElementById("emergencyStatus");
+            const alertSound = document.getElementById("alertSound");
+            
+            let isEmergency = false;
+            let emergencyMessage = "Normal";
+            
+            // Check all emergency conditions (simplified for example)
+            if (data.field5 === "1") {
+                emergencyMessage = "MANUAL SOS!";
+                isEmergency = true;
+            } 
+            else if (data.field8 === "1") {
+                emergencyMessage = "BATTERY CRITICAL!";
+                isEmergency = true;
+            }
+            else if (data.field1 && (data.field1 < 50 || data.field1 > 150)) {
+                emergencyMessage = "HEART RATE ALERT!";
+                isEmergency = true;
+            }
+            else if (data.field2 && data.field3 && data.field4 && 
+                     (Math.abs(data.field2) > 15 || Math.abs(data.field3) > 15 || Math.abs(data.field4) > 15)) {
+                emergencyMessage = "HIGH IMPACT DETECTED!";
+                isEmergency = true;
+            }
+            
+            emergencyElement.textContent = emergencyMessage;
+            
+            if (isEmergency) {
+                emergencyBox.classList.add("emergency-active");
+                if (!alertPlaying) {
+                    alertSound.play().catch(e => console.log("Audio play prevented:", e));
+                    alertPlaying = true;
+                    setTimeout(() => { alertPlaying = false; }, 5000);
+                }
+            } else {
+                emergencyBox.classList.remove("emergency-active");
+            }
+        }
+        
+        // Initial fetch and then every 5 seconds
+        fetchData();
+        setInterval(fetchData, 5000);
+    </script>
+</body>
+</html>

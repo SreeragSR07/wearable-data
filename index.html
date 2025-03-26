@@ -3,224 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Wearable Device Dashboard</title>
+    <title>Wearable Device Live Data</title>
     <style>
-        /* Previous CSS remains the same */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            justify-content: center;
+        }
+        .data-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            height: 300px;
+            transition: all 0.3s ease;
+        }
+        .data-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .data-box i {
+            font-size: 100px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #56CCF2, #2F80ED);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .data-box p {
+            font-size: 22px;
+            font-weight: 500;
+            margin: 0 0 10px 0;
+        }
+        .data-box span {
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .timestamp {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-top: 25px;
+        }
+        
+        /* Emergency Alert Styles */
         .emergency-active {
             animation: emergencyPulse 1s infinite;
             background-color: #ffebee;
             border: 2px solid #ff4b2b;
         }
-        .emergency-text {
-            color: #e74c3c;
-            font-weight: bold;
+        @keyframes emergencyPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 75, 43, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Previous HTML remains the same until the script -->
+    <div class="container">
+        <h1>Live Sensor Data Dashboard</h1>
+        <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
+        
+        <div class="data-grid">
+            <div class="data-box" id="emergencyBox">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Emergency Status</p>
+                <span id="emergencyStatus">Normal</span>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
     
     <script>
-        const apiKey = "JB035BQVNPNCBMKN";
-        const channelID = "2865083";
-        const defaultLat = 10.178180;
-        const defaultLon = 76.431107;
-        let alertPlaying = false;
-        
-        // Restricted zones (latitude, longitude, radius in km)
-        const restrictedZones = [
-            {lat: 10.180000, lon: 76.430000, radius: 0.5, name: "Construction Site"},
-            {lat: 10.185000, lon: 76.435000, radius: 0.3, name: "Restricted Area A"}
-        ];
-        
-        // Movement tracking variables
-        let lastMovementTime = Date.now();
-        let lastAccelValues = {x: 0, y: 0, z: 0};
-        let freeFallStartTime = null;
-        let emergencyState = {
-            fallDetected: false,
-            freeFall: false,
-            noMovement: false,
-            highImpact: false,
-            heartRateAlert: false,
-            manualSOS: false,
-            restrictedArea: false,
-            lowBattery: false
-        };
-        
-        // Calculate distance between two coordinates (Haversine formula)
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Earth radius in km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-        
-        // Check if location is in restricted zone
-        function checkRestrictedZone(lat, lon) {
-            for (const zone of restrictedZones) {
-                const distance = calculateDistance(lat, lon, zone.lat, zone.lon);
-                if (distance <= zone.radius) {
-                    return zone.name;
-                }
-            }
-            return false;
-        }
-        
         async function fetchData() {
             try {
-                const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
+                const response = await fetch(`https://api.thingspeak.com/channels/2865083/feeds/last.json?api_key=JB035BQVNPNCBMKN`);
                 const data = await response.json();
                 
-                // Update data fields
-                document.getElementById("heartRate").textContent = data.field1 || "--";
-                const accelX = parseFloat(data.field2) || 0;
-                const accelY = parseFloat(data.field3) || 0;
-                const accelZ = parseFloat(data.field4) || 0;
-                document.getElementById("accelX").textContent = accelX.toFixed(2);
-                document.getElementById("accelY").textContent = accelY.toFixed(2);
-                document.getElementById("accelZ").textContent = accelZ.toFixed(2);
+                const emergencyBox = document.getElementById("emergencyBox");
+                const emergencyElement = document.getElementById("emergencyStatus");
+                const alertSound = document.getElementById("alertSound");
                 
-                // Update GPS
-                const lat = data.field6 ? parseFloat(data.field6).toFixed(6) : defaultLat;
-                const lon = data.field7 ? parseFloat(data.field7).toFixed(6) : defaultLon;
-                document.getElementById("gps").textContent = `${lat}, ${lon}`;
+                let isEmergency = false;
+                let emergencyMessage = "Normal";
                 
-                // Check for emergencies
-                checkEmergencies(data, accelX, accelY, accelZ, lat, lon);
+                if (data.field5 === "1") {
+                    emergencyMessage = "MANUAL SOS!";
+                    isEmergency = true;
+                } else if (data.field8 === "1") {
+                    emergencyMessage = "BATTERY CRITICAL!";
+                    isEmergency = true;
+                } else if (data.field1 && (data.field1 < 50 || data.field1 > 150)) {
+                    emergencyMessage = "HEART RATE ALERT!";
+                    isEmergency = true;
+                } else if (data.field2 && data.field3 && data.field4) {
+                    let ax = Math.abs(data.field2);
+                    let ay = Math.abs(data.field3);
+                    let az = Math.abs(data.field4);
+                    
+                    if (ax < 0.5 && ay < 0.5 && az < 0.5) {
+                        emergencyMessage = "FREE FALL DETECTED!";
+                        isEmergency = true;
+                    } else if (ax > 15 || ay > 15 || az > 15) {
+                        emergencyMessage = "HIGH IMPACT DETECTED!";
+                        isEmergency = true;
+                    }
+                }
                 
-                // Update timestamp
+                emergencyElement.textContent = emergencyMessage;
+                
+                if (isEmergency) {
+                    emergencyBox.classList.add("emergency-active");
+                    alertSound.play().catch(e => console.log("Audio play prevented:", e));
+                } else {
+                    emergencyBox.classList.remove("emergency-active");
+                }
+                
                 document.getElementById("timestamp").textContent = data.created_at ? 
                     new Date(data.created_at).toLocaleString() : "Not available";
-                    
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
         
-        function checkEmergencies(data, accelX, accelY, accelZ, lat, lon) {
-            const emergencyBox = document.getElementById("emergencyBox");
-            const emergencyElement = document.getElementById("emergencyStatus");
-            const alertSound = document.getElementById("alertSound");
-            
-            // Reset emergency state
-            emergencyState = {
-                fallDetected: false,
-                freeFall: false,
-                noMovement: false,
-                highImpact: false,
-                heartRateAlert: false,
-                manualSOS: false,
-                restrictedArea: false,
-                lowBattery: false
-            };
-            
-            // 1. Manual SOS Check
-            if (data.field5 === "1") {
-                emergencyState.manualSOS = true;
-            }
-            
-            // 2. Low Battery Check
-            if (data.field8 === "1") {
-                emergencyState.lowBattery = true;
-            }
-            
-            // 3. Heart Rate Anomaly
-            const heartRate = parseFloat(data.field1);
-            if (heartRate && (heartRate < 50 || heartRate > 150)) {
-                emergencyState.heartRateAlert = true;
-            }
-            
-            // 4. High Impact Detection
-            if (Math.abs(accelX) > 20 || Math.abs(accelY) > 20 || Math.abs(accelZ) > 20) {
-                emergencyState.highImpact = true;
-            }
-            
-            // 5. Fall Detection (sudden movement followed by stillness)
-            const currentAccel = {x: accelX, y: accelY, z: accelZ};
-            const movementThreshold = 1.0;
-            
-            // Check for significant movement
-            if (Math.abs(accelX - lastAccelValues.x) > movementThreshold ||
-                Math.abs(accelY - lastAccelValues.y) > movementThreshold ||
-                Math.abs(accelZ - lastAccelValues.z) > movementThreshold) {
-                lastMovementTime = Date.now();
-            }
-            
-            // 6. No Movement Alert (30+ seconds without significant movement)
-            if (Date.now() - lastMovementTime > 30000) {
-                emergencyState.noMovement = true;
-            }
-            
-            // 7. Free Fall Detection (all axes near 0)
-            const freeFallThreshold = 1.5;
-            if (Math.abs(accelX) < freeFallThreshold && 
-                Math.abs(accelY) < freeFallThreshold && 
-                Math.abs(accelZ) < freeFallThreshold) {
-                
-                if (!freeFallStartTime) {
-                    freeFallStartTime = Date.now();
-                } else if (Date.now() - freeFallStartTime > 2000) {
-                    emergencyState.freeFall = true;
-                }
-            } else {
-                freeFallStartTime = null;
-            }
-            
-            // 8. Restricted Area Alert
-            const restrictedZone = checkRestrictedZone(parseFloat(lat), parseFloat(lon));
-            if (restrictedZone) {
-                emergencyState.restrictedArea = true;
-                emergencyState.restrictedZoneName = restrictedZone;
-            }
-            
-            // Update last acceleration values
-            lastAccelValues = currentAccel;
-            
-            // Determine which emergency to display (priority order)
-            let emergencyMessage = "Normal";
-            if (emergencyState.manualSOS) {
-                emergencyMessage = "MANUAL SOS ACTIVATED!";
-            } else if (emergencyState.lowBattery) {
-                emergencyMessage = "BATTERY CRITICAL!";
-            } else if (emergencyState.restrictedArea) {
-                emergencyMessage = `RESTRICTED AREA: ${emergencyState.restrictedZoneName}`;
-            } else if (emergencyState.heartRateAlert) {
-                emergencyMessage = "HEART RATE ALERT!";
-            } else if (emergencyState.highImpact) {
-                emergencyMessage = "HIGH IMPACT DETECTED!";
-            } else if (emergencyState.fallDetected) {
-                emergencyMessage = "POSSIBLE FALL DETECTED!";
-            } else if (emergencyState.freeFall) {
-                emergencyMessage = "FREE FALL DETECTED!";
-            } else if (emergencyState.noMovement) {
-                emergencyMessage = "NO MOVEMENT ALERT!";
-            }
-            
-            emergencyElement.textContent = emergencyMessage;
-            
-            // Handle emergency visuals and sound
-            if (emergencyMessage !== "Normal") {
-                emergencyBox.classList.add("emergency-active");
-                emergencyElement.classList.add("emergency-text");
-                if (!alertPlaying) {
-                    alertSound.play().catch(e => console.log("Audio play prevented:", e));
-                    alertPlaying = true;
-                    setTimeout(() => { alertPlaying = false; }, 5000);
-                }
-            } else {
-                emergencyBox.classList.remove("emergency-active");
-                emergencyElement.classList.remove("emergency-text");
-            }
-        }
-        
-        // Initial fetch and then every 5 seconds
         fetchData();
         setInterval(fetchData, 5000);
     </script>

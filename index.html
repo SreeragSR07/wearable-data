@@ -7,9 +7,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
         
+        :root {
+            --box-height: 400px; /* Increased by 5cm (~200px) */
+            --icon-size: 180px;
+        }
+        
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f5f7fa;
             color: #333;
             display: flex;
             justify-content: center;
@@ -20,7 +25,7 @@
         }
         .container {
             width: 95%;
-            max-width: 1400px;
+            max-width: 1600px;
         }
         h1 {
             background: linear-gradient(to right, #000000, #434343);
@@ -29,68 +34,85 @@
             color: transparent;
             margin-bottom: 30px;
             font-weight: 600;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             text-align: center;
         }
         .data-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1cm;
+            gap: 1.5cm;
             justify-content: center;
         }
         .data-box {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 350px;
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
+            height: var(--box-height);
+            padding: 30px;
+            border-radius: 25px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
-            background: white;
-            border: 1px solid #e0e0e0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,245,245,0.95));
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
         }
         .data-box:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+        .data-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255,255,255,0.2) 0%,
+                rgba(255,255,255,0) 50%,
+                rgba(255,255,255,0.2) 100%
+            );
+            transform: rotate(30deg);
+            z-index: 1;
         }
         .icon-container {
-            position: relative;
-            z-index: 2;
-            margin-bottom: 20px;
-            height: 150px;
-            width: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: var(--icon-size);
+            height: var(--icon-size);
+            margin-right: 30px;
+            position: relative;
+            z-index: 2;
         }
         .icon-symbol {
-            font-size: 140px;
+            font-size: var(--icon-size);
             background: linear-gradient(135deg, #87CEEB, #1E90FF);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
         }
-        .data-box p {
+        .content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
             position: relative;
             z-index: 2;
-            font-size: 24px;
+        }
+        .data-box p {
+            font-size: 26px;
             font-weight: 500;
-            margin: 15px 0 10px 0;
+            margin: 0 0 15px 0;
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
         .data-box span {
-            position: relative;
-            z-index: 2;
-            font-size: 42px;
+            font-size: 46px;
             font-weight: 600;
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
@@ -98,9 +120,9 @@
             color: transparent;
         }
         .timestamp {
-            font-size: 16px;
+            font-size: 18px;
             color: #7f8c8d;
-            margin-top: 30px;
+            margin-top: 40px;
             text-align: center;
         }
         
@@ -116,9 +138,9 @@
         }
         
         .unit {
-            font-size: 18px;
+            font-size: 20px;
             color: #7f8c8d;
-            margin-left: 5px;
+            margin-left: 8px;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -133,43 +155,55 @@
                 <div class="icon-container">
                     <i class="fas fa-heart icon-symbol"></i>
                 </div>
-                <p>Heart Rate</p>
-                <span id="heartRate">--</span><span class="unit">BPM</span>
+                <div class="content">
+                    <p>Heart Rate</p>
+                    <span id="heartRate">--</span><span class="unit">BPM</span>
+                </div>
             </div>
             <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-map-marker-alt icon-symbol"></i>
                 </div>
-                <p>GPS Location</p>
-                <span id="gps">--</span>
+                <div class="content">
+                    <p>GPS Location</p>
+                    <span id="gps">--</span>
+                </div>
             </div>
             <div class="data-box" id="emergencyBox">
                 <div class="icon-container">
                     <i class="fas fa-exclamation-triangle icon-symbol"></i>
                 </div>
-                <p>Emergency Status</p>
-                <span id="emergencyStatus">Normal</span>
+                <div class="content">
+                    <p>Emergency Status</p>
+                    <span id="emergencyStatus">Normal</span>
+                </div>
             </div>
             <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-arrows-alt-h icon-symbol"></i>
                 </div>
-                <p>Acceleration X</p>
-                <span id="accelX">--</span><span class="unit">m/s²</span>
+                <div class="content">
+                    <p>Acceleration X</p>
+                    <span id="accelX">--</span><span class="unit">m/s²</span>
+                </div>
             </div>
             <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-arrows-alt-v icon-symbol"></i>
                 </div>
-                <p>Acceleration Y</p>
-                <span id="accelY">--</span><span class="unit">m/s²</span>
+                <div class="content">
+                    <p>Acceleration Y</p>
+                    <span id="accelY">--</span><span class="unit">m/s²</span>
+                </div>
             </div>
             <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-arrow-up icon-symbol"></i>
                 </div>
-                <p>Acceleration Z</p>
-                <span id="accelZ">--</span><span class="unit">m/s²</span>
+                <div class="content">
+                    <p>Acceleration Z</p>
+                    <span id="accelZ">--</span><span class="unit">m/s²</span>
+                </div>
             </div>
         </div>
     </div>

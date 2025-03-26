@@ -12,99 +12,111 @@
             background-color: #f5f7fa;
             color: #333;
             margin: 0;
-            padding: 0.5cm;
+            padding: 0;
             width: 36cm;
             height: 36cm;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
+        
         .container {
             width: 35cm;
             height: 35cm;
             display: flex;
             flex-direction: column;
+            align-items: center;
         }
+        
         h1 {
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin: 0.2cm 0 0.5cm 0;
+            margin: 0.3cm 0 0.6cm 0;
             font-weight: 600;
-            font-size: 1.8cm;
+            font-size: 1.2cm;
             text-align: center;
         }
+        
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(3, 10cm);
-            grid-template-rows: repeat(2, 10cm);
-            gap: 0.5cm;
-            width: 31.5cm; /* 3 boxes × 10cm + 2 gaps × 0.5cm */
-            height: 20.5cm; /* 2 boxes × 10cm + 1 gap × 0.5cm */
-            margin: 0 auto;
+            grid-template-columns: repeat(3, 7cm);
+            grid-template-rows: repeat(2, 7cm);
+            gap: 1.5cm; /* Adjusted gap for perfect spacing */
+            width: 27cm; /* (3 × 7cm) + (2 × 1.5cm) */
+            height: 17cm; /* (2 × 7cm) + (1 × 1.5cm) */
         }
+        
         .data-box {
-            width: 10cm;
-            height: 10cm;
-            padding: 0.5cm;
-            border-radius: 0.5cm;
+            width: 7cm;
+            height: 7cm;
+            padding: 0.4cm;
+            border-radius: 0.4cm;
             box-shadow: 0 0.1cm 0.2cm rgba(0, 0, 0, 0.1);
             background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,245,245,0.95));
             border: 1px solid rgba(255,255,255,0.3);
             display: flex;
             align-items: center;
         }
+        
         .icon-container {
-            width: 3.5cm;
-            height: 3.5cm;
+            width: 2.5cm;
+            height: 2.5cm;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 0.5cm;
+            margin-right: 0.4cm;
         }
+        
         .icon-symbol {
-            font-size: 3.5cm;
+            font-size: 2.5cm;
             background: linear-gradient(135deg, #87CEEB, #1E90FF);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
+        
         .content {
             display: flex;
             flex-direction: column;
             justify-content: center;
             flex: 1;
         }
+        
         .data-box p {
-            font-size: 0.7cm;
+            font-size: 0.5cm;
             font-weight: 500;
-            margin: 0 0 0.2cm 0;
+            margin: 0 0 0.15cm 0;
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
+        
         .data-box span {
-            font-size: 1cm;
+            font-size: 0.7cm;
             font-weight: 600;
             background: linear-gradient(to right, #000000, #434343);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
+        
         .timestamp {
-            font-size: 0.5cm;
+            font-size: 0.4cm;
             color: #7f8c8d;
             text-align: center;
-            margin-top: 0.5cm;
+            margin-top: 0.8cm;
         }
         
         .emergency-active {
             animation: pulse 1.5s infinite;
             border: 2px solid #ff4b2b;
         }
+        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.02); }
@@ -112,7 +124,7 @@
         }
         
         .unit {
-            font-size: 0.5cm;
+            font-size: 0.4cm;
             color: #7f8c8d;
             margin-left: 0.1cm;
         }

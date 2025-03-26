@@ -23,7 +23,7 @@
             max-width: 1400px;
         }
         h1 {
-            color: #2c3e50;
+            color: #5d4037;
             margin-bottom: 30px;
             font-weight: 600;
             font-size: 2.5rem;
@@ -49,6 +49,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             color: white;
+            background: linear-gradient(135deg, #d4a373, #a68a64);
         }
         .data-box:hover {
             transform: translateY(-5px);
@@ -96,29 +97,10 @@
             text-align: center;
         }
         
-        /* Gradient Backgrounds */
-        .heart-rate {
-            background: linear-gradient(135deg, #ff5e62, #ff9966);
-        }
-        .gps {
-            background: linear-gradient(135deg, #4b6cb7, #182848);
-        }
-        .emergency {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
-        }
-        .accel-x {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-        }
-        .accel-y {
-            background: linear-gradient(135deg, #a8ff78, #78ffd6);
-        }
-        .accel-z {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-        }
-        
         /* Emergency state */
         .emergency-active {
             animation: pulse 1.5s infinite;
+            background: linear-gradient(135deg, #d4a373, #bc6c25) !important;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -134,42 +116,42 @@
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
         
         <div class="data-grid">
-            <div class="data-box heart-rate">
+            <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-heartbeat"></i>
                 </div>
                 <p>Heart Rate</p>
                 <span id="heartRate">--</span> BPM
             </div>
-            <div class="data-box gps">
+            <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-location-dot"></i>
                 </div>
                 <p>GPS Location</p>
                 <span id="gps">--</span>
             </div>
-            <div class="data-box emergency" id="emergencyBox">
+            <div class="data-box" id="emergencyBox">
                 <div class="icon-container">
                     <i class="fas fa-triangle-exclamation"></i>
                 </div>
                 <p>Emergency Status</p>
                 <span id="emergencyStatus">Normal</span>
             </div>
-            <div class="data-box accel-x">
+            <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-arrows-left-right"></i>
                 </div>
                 <p>Acceleration X</p>
                 <span id="accelX">--</span> m/s²
             </div>
-            <div class="data-box accel-y">
+            <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-arrows-up-down"></i>
                 </div>
                 <p>Acceleration Y</p>
                 <span id="accelY">--</span> m/s²
             </div>
-            <div class="data-box accel-z">
+            <div class="data-box">
                 <div class="icon-container">
                     <i class="fas fa-arrow-up"></i>
                 </div>

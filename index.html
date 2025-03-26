@@ -51,6 +51,10 @@
             background: white;
             border: 1px solid #e0e0e0;
         }
+        .heart-rate-box {
+            background: linear-gradient(135deg, #87CEEB, #1E90FF);
+            color: white;
+        }
         .data-box:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
@@ -65,12 +69,22 @@
             align-items: center;
             justify-content: center;
         }
+        .heart-icon {
+            font-size: 100px;
+            color: white;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
         .data-box img {
             height: 100%;
             width: 100%;
             object-fit: contain;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1)) 
                     brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1458%) hue-rotate(195deg) brightness(97%) contrast(101%);
+        }
+        .heart-rate-box p,
+        .heart-rate-box span {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         .data-box p {
             position: relative;
@@ -114,7 +128,11 @@
             color: #7f8c8d;
             margin-left: 5px;
         }
+        .heart-unit {
+            color: rgba(255,255,255,0.8);
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -122,12 +140,12 @@
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
         
         <div class="data-grid">
-            <div class="data-box">
+            <div class="data-box heart-rate-box">
                 <div class="icon-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3058/3058963.png" alt="Heart Rate">
+                    <i class="fas fa-heart heart-icon"></i>
                 </div>
                 <p>Heart Rate</p>
-                <span id="heartRate">--</span><span class="unit">BPM</span>
+                <span id="heartRate">--</span><span class="unit heart-unit">BPM</span>
             </div>
             <div class="data-box">
                 <div class="icon-container">

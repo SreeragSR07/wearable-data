@@ -6,30 +6,33 @@
     <title>Wearable Device Live Data</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            background-color: #eef2f3;
+            background-color: #f5f7fa;
             color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             flex-direction: column;
+            padding: 20px;
         }
         .container {
             width: 90%;
-            max-width: 1000px;
+            max-width: 1200px;
             padding: 20px;
         }
         h1 {
-            color: #007BFF;
-            margin-bottom: 20px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+            font-size: 2.5rem;
         }
         .data-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 1cm; /* 1cm gap between boxes */
             justify-content: center;
         }
         .data-box {
@@ -38,30 +41,69 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            height: 400px;
-            background: linear-gradient(135deg, #f5f5f5, #dcdcdc);
-            padding: 20px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-            border-radius: 25px;
+            height: 300px;
+            background: white;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
             text-align: center;
-            color: black;
+            color: #2c3e50;
             position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .data-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
         }
         .data-box i {
-            font-size: 180px;
-            opacity: 0.9;
+            font-size: 120px;
             margin-bottom: 15px;
-            color: white;
+            position: absolute;
+            opacity: 0.1;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: inherit;
         }
-        .data-box p, .data-box span {
+        .data-box p {
             position: relative;
             z-index: 2;
-            font-size: 28px;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            padding: 0 20px;
+        }
+        .data-box span {
+            position: relative;
+            z-index: 2;
+            font-size: 36px;
+            font-weight: 700;
+            margin-top: 10px;
         }
         .timestamp {
             font-size: 16px;
-            color: gray;
-            margin-top: 20px;
+            color: #7f8c8d;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        
+        /* Individual box styling */
+        .heart-rate {
+            color: #e74c3c;
+        }
+        .gps {
+            color: #3498db;
+        }
+        .emergency {
+            color: #f39c12;
+        }
+        .accel {
+            color: #2ecc71;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" crossorigin="anonymous"></script>
@@ -72,33 +114,33 @@
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
         
         <div class="data-grid">
-            <div class="data-box">
-                <i class="fas fa-heartbeat" style="color: red;"></i>
+            <div class="data-box heart-rate">
+                <i class="fas fa-heartbeat"></i>
                 <p>Heart Rate</p>
                 <span id="heartRate">Loading...</span> BPM
             </div>
-            <div class="data-box">
-                <i class="fas fa-map-marker-alt" style="color: gold;"></i>
+            <div class="data-box gps">
+                <i class="fas fa-map-marker-alt"></i>
                 <p>GPS Location</p>
                 <span id="gps">Loading...</span>
             </div>
-            <div class="data-box">
-                <i class="fas fa-exclamation-triangle" style="color: orange;"></i>
+            <div class="data-box emergency">
+                <i class="fas fa-exclamation-triangle"></i>
                 <p>Emergency</p>
                 <span id="emergencyStatus">No Alert</span>
             </div>
-            <div class="data-box">
-                <i class="fas fa-wave-square" style="color: cyan;"></i>
+            <div class="data-box accel">
+                <i class="fas fa-wave-square"></i>
                 <p>Acceleration X</p>
                 <span id="accelX">Loading...</span>
             </div>
-            <div class="data-box">
-                <i class="fas fa-wave-square" style="color: cyan;"></i>
+            <div class="data-box accel">
+                <i class="fas fa-wave-square"></i>
                 <p>Acceleration Y</p>
                 <span id="accelY">Loading...</span>
             </div>
-            <div class="data-box">
-                <i class="fas fa-wave-square" style="color: cyan;"></i>
+            <div class="data-box accel">
+                <i class="fas fa-wave-square"></i>
                 <p>Acceleration Z</p>
                 <span id="accelZ">Loading...</span>
             </div>
@@ -126,15 +168,22 @@
                 document.getElementById("gps").innerText = `${lat}, ${lon}`;
                 
                 const emergencyStatus = data.field5 || "0";
-                document.getElementById("emergencyStatus").innerText = emergencyStatus === "1" ? "ALERT!" : "No Alert";
+                const emergencyElement = document.getElementById("emergencyStatus");
+                emergencyElement.innerText = emergencyStatus === "1" ? "ALERT!" : "No Alert";
+                if (emergencyStatus === "1") {
+                    emergencyElement.parentElement.style.color = "#e74c3c";
+                    emergencyElement.parentElement.style.fontWeight = "bold";
+                }
                 
                 document.getElementById("timestamp").innerText = new Date(data.created_at).toLocaleString();
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
-        setInterval(fetchData, 5000);
+        
+        // Fetch immediately and then every 5 seconds
         fetchData();
+        setInterval(fetchData, 5000);
     </script>
 </body>
 </html>

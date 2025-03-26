@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wearable Device Live Data</title>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -48,7 +47,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            height: 200px;
+            height: 300px;
             transition: all 0.3s ease;
         }
         .data-box:hover {
@@ -56,17 +55,20 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
         .data-box i {
-            font-size: 50px;
-            margin-bottom: 10px;
-            color: #2F80ED;
+            font-size: 100px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #56CCF2, #2F80ED);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .data-box p {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 500;
             margin: 0 0 10px 0;
         }
         .data-box span {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: 600;
         }
         .timestamp {
@@ -74,92 +76,285 @@
             color: #7f8c8d;
             margin-top: 25px;
         }
-        .data-box a {
-            text-decoration: none;
-            color: #007bff;
+        .error-message {
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .emergency-box {
+            animation: emergencyPulse 1s infinite;
+            background-color: #ffebee;
+            border: 2px solid #ff4b2b;
+        }
+        .emergency-text {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        @keyframes emergencyPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 75, 43, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+        }
+        .sos-button {
+            margin-top: 15px;
+            padding: 15px 30px;
             font-size: 18px;
-            margin-top: 10px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #ff4b2b, #ff416c);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(255, 65, 108, 0.3);
+        }
+        .sos-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(255, 65, 108, 0.4);
+        }
+        .location-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background: linear-gradient(135deg, #56CCF2, #2F80ED);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(41, 128, 185, 0.2);
+        }
+        .location-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+        @media (max-width: 768px) {
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+            .data-box {
+                height: 250px;
+            }
+            .data-box i {
+                font-size: 80px;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <h1>Live Sensor Data Dashboard</h1>
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
+        <div id="errorDisplay" class="error-message"></div>
         
         <div class="data-grid">
             <div class="data-box">
                 <i class="fas fa-heartbeat"></i>
                 <p>Heart Rate</p>
-                <span id="heartRate">Loading...</span>
+                <span id="heartRate">--</span> BPM
             </div>
-            <div class="data-box" id="sosBox">
-                <i class="fas fa-bell"></i>
-                <p>SOS Emergency</p>
-                <span id="sosStatus">Normal</span>
-            </div>
-            <div class="data-box" id="alertBox">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Alert Emergency</p>
-                <span id="alertStatus">Normal</span>
-            </div>
+            
             <div class="data-box">
                 <i class="fas fa-map-marker-alt"></i>
                 <p>GPS Location</p>
-                <span id="gpsLocation">Loading...</span>
-                <a id="gpsLink" href="#" target="_blank">View on Map</a>
+                <span id="gps">10.178180, 76.431107 (Default)</span>
+                <button class="location-btn" id="locationButton">Show on Map</button>
             </div>
+            
+            <div class="data-box" id="sosBox">
+                <i class="fas fa-bell"></i>
+                <p>Emergency Button</p>
+                <button class="sos-button" id="sosButton">PRESS FOR SOS</button>
+                <span id="sosStatus">Ready</span>
+            </div>
+            
             <div class="data-box">
                 <i class="fas fa-arrows-alt-h"></i>
                 <p>Acceleration X</p>
-                <span id="accelX">Loading...</span>
+                <span id="accelX">--</span> m/s²
             </div>
+            
             <div class="data-box">
                 <i class="fas fa-arrows-alt-v"></i>
                 <p>Acceleration Y</p>
-                <span id="accelY">Loading...</span>
+                <span id="accelY">--</span> m/s²
             </div>
-            <div class="data-box">
-                <i class="fas fa-compress-alt"></i>
-                <p>Acceleration Z</p>
-                <span id="accelZ">Loading...</span>
-            </div>
-            <div class="data-box">
-                <i class="fas fa-battery-half"></i>
-                <p>Battery Voltage</p>
-                <span id="batteryVoltage">Loading...</span>
+            
+            <div class="data-box" id="alertBox">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Automatic Alerts</p>
+                <span id="autoAlertStatus">All systems normal</span>
             </div>
         </div>
     </div>
     
+    <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
+    
     <script>
-        async function fetchData() {
-            try {
-                const response = await fetch(`https://api.thingspeak.com/channels/2865083/feeds/last.json?api_key=JB035BQVNPNCBMKN`);
-                const data = await response.json();
+        document.addEventListener('DOMContentLoaded', function() {
+            const apiKey = "JB035BQVNPNCBMKN";
+            const channelID = "2865083";
+            const defaultLat = 10.178180;
+            const defaultLon = 76.431107;
+            let alertPlaying = false;
+            let hasGPSFix = false;
+            
+            // Restricted zones
+            const restrictedZones = [
+                {lat: 10.180000, lon: 76.430000, radius: 0.5, name: "Construction Site"},
+                {lat: 10.185000, lon: 76.435000, radius: 0.3, name: "Restricted Area A"}
+            ];
+            
+            // Initialize default location
+            document.getElementById("locationButton").onclick = function() {
+                window.open(`https://www.google.com/maps?q=${defaultLat},${defaultLon}`, "_blank");
+            };
+            
+            // SOS Button Event
+            document.getElementById("sosButton").addEventListener('click', function() {
+                document.getElementById("sosBox").classList.add("emergency-box");
+                document.getElementById("sosStatus").textContent = "SOS ACTIVATED!";
+                document.getElementById("sosStatus").classList.add("emergency-text");
+                triggerAlarm();
+                // In real implementation, this would send signal to backend
+                console.log("SOS button pressed!");
+            });
+            
+            async function fetchData() {
+                try {
+                    // Simulate API call with test data
+                    const testData = {
+                        field1: "72",  // Heart rate
+                        field2: "0.12", // Accel X
+                        field3: "0.98", // Accel Y
+                        field4: "9.81", // Accel Z
+                        field5: "0",    // Manual SOS
+                        field6: "10.178280", // Latitude (slightly different from default)
+                        field7: "76.431207", // Longitude
+                        field8: "0",     // Battery status
+                        created_at: new Date().toISOString()
+                    };
+                    
+                    // In production, use:
+                    // const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
+                    // const data = await response.json();
+                    const data = testData; // Remove this line in production
+                    
+                    // Update data fields
+                    document.getElementById("heartRate").textContent = data.field1 || "--";
+                    document.getElementById("accelX").textContent = data.field2 ? parseFloat(data.field2).toFixed(2) : "--";
+                    document.getElementById("accelY").textContent = data.field3 ? parseFloat(data.field3).toFixed(2) : "--";
+                    document.getElementById("accelZ").textContent = data.field4 ? parseFloat(data.field4).toFixed(2) : "--";
+                    
+                    // Update GPS - show default first, then real data when available
+                    if (data.field6 && data.field7) {
+                        const lat = parseFloat(data.field6).toFixed(6);
+                        const lon = parseFloat(data.field7).toFixed(6);
+                        document.getElementById("gps").textContent = `${lat}, ${lon}`;
+                        document.getElementById("locationButton").onclick = function() {
+                            window.open(`https://www.google.com/maps?q=${lat},${lon}`, "_blank");
+                        };
+                        hasGPSFix = true;
+                    } else {
+                        document.getElementById("gps").textContent = `${defaultLat}, ${defaultLon} (Searching GPS...)`;
+                        hasGPSFix = false;
+                    }
+                    
+                    // Check for emergencies
+                    checkEmergencies(data);
+                    
+                    // Update timestamp
+                    document.getElementById("timestamp").textContent = data.created_at ? 
+                        new Date(data.created_at).toLocaleString() : "Not available";
+                        
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    document.getElementById("errorDisplay").textContent = 
+                        "Connection error - retrying...";
+                    document.getElementById("gps").textContent = `${defaultLat}, ${defaultLon} (Offline)`;
+                }
+            }
+            
+            function checkEmergencies(data) {
+                const accelX = parseFloat(data.field2) || 0;
+                const accelY = parseFloat(data.field3) || 0;
+                const accelZ = parseFloat(data.field4) || 0;
                 
-                document.getElementById("heartRate").textContent = data.field1 || "N/A";
-                document.getElementById("accelX").textContent = data.field2 || "N/A";
-                document.getElementById("accelY").textContent = data.field3 || "N/A";
-                document.getElementById("accelZ").textContent = data.field4 || "N/A";
-                document.getElementById("gpsLocation").textContent = `${data.field6 || "N/A"}, ${data.field7 || "N/A"}`;
-                document.getElementById("batteryVoltage").textContent = `${data.field8 || "N/A"} V";
+                // Reset automatic alerts
+                const autoAlerts = [];
                 
-                if (data.field6 && data.field7) {
-                    document.getElementById("gpsLink").href = `https://www.google.com/maps?q=${data.field6},${data.field7}`;
+                // Check all emergency conditions
+                if (data.field8 === "1") autoAlerts.push("LOW BATTERY");
+                
+                const heartRate = parseFloat(data.field1);
+                if (heartRate && (heartRate < 50 || heartRate > 150)) {
+                    autoAlerts.push("HEART RATE");
                 }
                 
-                document.getElementById("sosStatus").textContent = data.field5 === "1" ? "🚨 SOS Triggered!" : "Normal";
-                document.getElementById("alertStatus").textContent = data.field9 === "1" ? "⚠️ Alert Triggered!" : "Normal";
+                if (Math.abs(accelX) > 20 || Math.abs(accelY) > 20 || Math.abs(accelZ) > 20) {
+                    autoAlerts.push("HIGH IMPACT");
+                }
                 
-                document.getElementById("timestamp").textContent = data.created_at ? new Date(data.created_at).toLocaleString() : "Not available";
-            } catch (error) {
-                console.error("Error fetching data:", error);
+                // Check restricted zones only if we have GPS fix
+                if (hasGPSFix && data.field6 && data.field7) {
+                    const restrictedZone = checkRestrictedZone(parseFloat(data.field6), parseFloat(data.field7));
+                    if (restrictedZone) {
+                        autoAlerts.push(`RESTRICTED AREA (${restrictedZone})`);
+                    }
+                }
+                
+                // Update automatic alerts display
+                const alertBox = document.getElementById("alertBox");
+                const alertStatus = document.getElementById("autoAlertStatus");
+                
+                if (autoAlerts.length > 0) {
+                    alertBox.classList.add("emergency-box");
+                    alertStatus.textContent = autoAlerts.join(", ") + " ALERT!";
+                    alertStatus.classList.add("emergency-text");
+                    triggerAlarm();
+                } else {
+                    alertBox.classList.remove("emergency-box");
+                    alertStatus.textContent = "All systems normal";
+                    alertStatus.classList.remove("emergency-text");
+                }
             }
-        }
-        
-        fetchData();
-        setInterval(fetchData, 5000);
+            
+            function checkRestrictedZone(lat, lon) {
+                for (const zone of restrictedZones) {
+                    const distance = calculateDistance(lat, lon, zone.lat, zone.lon);
+                    if (distance <= zone.radius) {
+                        return zone.name;
+                    }
+                }
+                return false;
+            }
+            
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = 
+                    Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c;
+            }
+            
+            function triggerAlarm() {
+                if (!alertPlaying) {
+                    const alertSound = document.getElementById("alertSound");
+                    alertSound.play().catch(e => console.log("Audio play prevented:", e));
+                    alertPlaying = true;
+                    setTimeout(() => { alertPlaying = false; }, 5000);
+                }
+            }
+            
+            // Initial fetch and then every 5 seconds
+            fetchData();
+            setInterval(fetchData, 5000);
+        });
     </script>
 </body>
 </html>

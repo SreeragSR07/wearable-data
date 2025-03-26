@@ -134,6 +134,12 @@
                 <span id="accelY">0.98</span> m/s²
             </div>
             
+            <div class="data-box">
+                <i class="fas fa-arrow-up"></i>
+                <p>Acceleration Z</p>
+                <span id="accelZ">9.81</span> m/s²
+            </div>
+            
             <div class="data-box" id="alertBox">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>Automatic Alerts</p>
@@ -170,20 +176,24 @@
             const alertBox = document.getElementById('alertBox');
             const alertsText = document.getElementById('alerts');
             
-            // Simulate random sensor readings
+            // Simulate random sensor readings for all three axes
             const heartRate = 70 + Math.floor(Math.random() * 30);
             const accelX = (Math.random() * 20).toFixed(2);
             const accelY = (Math.random() * 20).toFixed(2);
+            const accelZ = (8 + Math.random() * 4).toFixed(2); // Z-axis typically includes gravity
             
+            // Update all displays
             document.getElementById('heartRate').textContent = heartRate;
             document.getElementById('accelX').textContent = accelX;
             document.getElementById('accelY').textContent = accelY;
+            document.getElementById('accelZ').textContent = accelZ;
             
             // Check for automatic alerts (never affects SOS state)
             const alertMessages = [];
             if (heartRate > 100) alertMessages.push("High heart rate");
             if (heartRate < 50) alertMessages.push("Low heart rate");
-            if (accelX > 15 || accelY > 15) alertMessages.push("High impact");
+            if (accelX > 15 || accelY > 15 || accelZ > 15) alertMessages.push("High impact");
+            if (accelZ < 5) alertMessages.push("Possible free fall");
             
             if (alertMessages.length > 0) {
                 alertBox.classList.add('emergency');
@@ -201,6 +211,9 @@
             window.open('https://www.google.com/maps?q=10.17818,76.43110');
         });
 
+        // Initialize with proper Z-axis value
+        document.getElementById('accelZ').textContent = '9.81'; // Earth's gravity
+        
         // Update data every 3 seconds (doesn't affect SOS state)
         checkAutomaticAlerts();
         setInterval(checkAutomaticAlerts, 3000);

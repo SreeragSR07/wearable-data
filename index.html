@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wearable Device Live Data</title>
     <style>
-        /* Your existing CSS styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
@@ -24,216 +23,125 @@
             max-width: 1200px;
             padding: 20px;
         }
-        /* ... (keep all your existing styles) ... */
-        .error-message {
-            color: #e74c3c;
-            font-weight: bold;
-            margin: 20px 0;
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            justify-content: center;
+        }
+        .data-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            height: 300px;
+            transition: all 0.3s ease;
+        }
+        .data-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .data-box i {
+            font-size: 100px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #56CCF2, #2F80ED);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .data-box p {
+            font-size: 22px;
+            font-weight: 500;
+            margin: 0 0 10px 0;
+        }
+        .data-box span {
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .timestamp {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-top: 25px;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <h1>Live Sensor Data Dashboard</h1>
         <p class="timestamp">Last Updated: <span id="timestamp">Loading...</span></p>
-        <div id="errorDisplay" class="error-message"></div>
         
         <div class="data-grid">
             <div class="data-box">
                 <i class="fas fa-heartbeat"></i>
                 <p>Heart Rate</p>
-                <span id="heartRate">--</span> BPM
+                <span id="heartRate">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-ruler-combined"></i>
+                <p>Accelerometer</p>
+                <span id="accelerometer">Loading...</span>
             </div>
             <div class="data-box">
                 <i class="fas fa-map-marker-alt"></i>
                 <p>GPS Location</p>
-                <span id="gps">--</span>
-                <button class="location-btn" id="locationButton">Show on Map</button>
+                <span id="gpsLocation">Loading...</span>
+            </div>
+            <div class="data-box">
+                <i class="fas fa-battery-half"></i>
+                <p>Battery Status</p>
+                <span id="batteryStatus">Loading...</span>
             </div>
             <div class="data-box" id="emergencyBox">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>Emergency Status</p>
                 <span id="emergencyStatus">Normal</span>
             </div>
-            <div class="data-box">
-                <i class="fas fa-arrows-alt-h"></i>
-                <p>Acceleration X</p>
-                <span id="accelX">--</span> m/s²
-            </div>
-            <div class="data-box">
-                <i class="fas fa-arrows-alt-v"></i>
-                <p>Acceleration Y</p>
-                <span id="accelY">--</span> m/s²
-            </div>
-            <div class="data-box">
-                <i class="fas fa-arrow-up"></i>
-                <p>Acceleration Z</p>
-                <span id="accelZ">--</span> m/s²
-            </div>
         </div>
     </div>
     
-    <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
-    
     <script>
-        // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            const apiKey = "JB035BQVNPNCBMKN";
-            const channelID = "2865083";
-            const defaultLat = 10.178180;
-            const defaultLon = 76.431107;
-            let alertPlaying = false;
-            
-            // Test Data - Remove this in production
-            const testData = {
-                field1: "72",  // Heart rate
-                field2: "0.12", // Accel X
-                field3: "0.98", // Accel Y
-                field4: "9.81", // Accel Z
-                field5: "0",    // Manual SOS
-                field6: "10.178180", // Latitude
-                field7: "76.431107", // Longitude
-                field8: "0",     // Battery status
-                created_at: new Date().toISOString()
-            };
-            
-            let useTestData = false; // Set to true for testing without API
-            
-            function displayError(message) {
-                const errorDisplay = document.getElementById("errorDisplay");
-                if (errorDisplay) {
-                    errorDisplay.textContent = message;
-                }
-                console.error(message);
-            }
-            
-            function clearError() {
-                const errorDisplay = document.getElementById("errorDisplay");
-                if (errorDisplay) {
-                    errorDisplay.textContent = "";
-                }
-            }
-            
-            function safeUpdateElement(id, value) {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value;
-                } else {
-                    console.warn(`Element with ID ${id} not found`);
-                }
-            }
-            
-            async function fetchData() {
-                try {
-                    clearError();
-                    
-                    let data;
-                    if (useTestData) {
-                        data = testData;
-                        displayError("Using test data - API not connected");
-                    } else {
-                        const response = await fetch(`https://api.thingspeak.com/channels/${channelID}/feeds/last.json?api_key=${apiKey}`);
-                        
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        
-                        data = await response.json();
-                        
-                        if (!data || Object.keys(data).length === 0) {
-                            useTestData = true;
-                            throw new Error("No data received from API - using test data");
-                        }
-                    }
-                    
-                    // Safely update all data fields
-                    safeUpdateElement("heartRate", data.field1 || "--");
-                    safeUpdateElement("accelX", data.field2 ? parseFloat(data.field2).toFixed(2) : "--");
-                    safeUpdateElement("accelY", data.field3 ? parseFloat(data.field3).toFixed(2) : "--");
-                    safeUpdateElement("accelZ", data.field4 ? parseFloat(data.field4).toFixed(2) : "--");
-                    
-                    // Update GPS with fallback to default
-                    const lat = data.field6 ? parseFloat(data.field6).toFixed(6) : defaultLat;
-                    const lon = data.field7 ? parseFloat(data.field7).toFixed(6) : defaultLon;
-                    safeUpdateElement("gps", `${lat}, ${lon}`);
-                    
-                    const locationButton = document.getElementById("locationButton");
-                    if (locationButton) {
-                        locationButton.onclick = () => {
-                            window.open(`https://www.google.com/maps?q=${lat},${lon}`, "_blank");
-                        };
-                    }
-                    
-                    // Update emergency status
-                    updateEmergencyStatus(data);
-                    
-                    // Update timestamp
-                    safeUpdateElement("timestamp", data.created_at ? 
-                        new Date(data.created_at).toLocaleString() : "Not available");
-                        
-                } catch (error) {
-                    displayError(`Error: ${error.message}. Trying again in 5 seconds...`);
-                    console.error("Fetch error:", error);
-                    
-                    // If API fails, use test data for visualization
-                    if (!useTestData) {
-                        useTestData = true;
-                        setTimeout(fetchData, 100); // Retry quickly with test data
-                    }
-                }
-            }
-            
-            function updateEmergencyStatus(data) {
-                const emergencyBox = document.getElementById("emergencyBox");
-                const emergencyElement = document.getElementById("emergencyStatus");
-                const alertSound = document.getElementById("alertSound");
+        async function fetchData() {
+            try {
+                const response = await fetch(`https://api.thingspeak.com/channels/2865083/feeds/last.json?api_key=JB035BQVNPNCBMKN`);
+                const data = await response.json();
                 
-                if (!emergencyBox || !emergencyElement) {
-                    console.warn("Emergency elements not found");
-                    return;
-                }
+                document.getElementById("heartRate").textContent = data.field1 || "N/A";
+                document.getElementById("accelerometer").textContent = `X: ${data.field2 || "N/A"}, Y: ${data.field3 || "N/A"}, Z: ${data.field4 || "N/A"}`;
+                document.getElementById("gpsLocation").textContent = `${data.field6 || "N/A"}, ${data.field7 || "N/A"}`;
+                document.getElementById("batteryStatus").textContent = data.field8 || "N/A";
                 
-                let isEmergency = false;
                 let emergencyMessage = "Normal";
-                
-                // Check all emergency conditions
                 if (data.field5 === "1") {
                     emergencyMessage = "MANUAL SOS!";
-                    isEmergency = true;
-                } 
-                else if (data.field8 === "1") {
+                } else if (data.field8 === "1") {
                     emergencyMessage = "BATTERY CRITICAL!";
-                    isEmergency = true;
-                }
-                else if (data.field1 && (data.field1 < 50 || data.field1 > 150)) {
+                } else if (data.field1 && (data.field1 < 50 || data.field1 > 150)) {
                     emergencyMessage = "HEART RATE ALERT!";
-                    isEmergency = true;
                 }
-                else if (data.field2 && data.field3 && data.field4 && 
-                         (Math.abs(data.field2) > 15 || Math.abs(data.field3) > 15 || Math.abs(data.field4) > 15)) {
-                    emergencyMessage = "HIGH IMPACT DETECTED!";
-                    isEmergency = true;
-                }
+                document.getElementById("emergencyStatus").textContent = emergencyMessage;
                 
-                emergencyElement.textContent = emergencyMessage;
-                
-                if (isEmergency) {
-                    emergencyBox.classList.add("emergency-active");
-                    if (!alertPlaying && alertSound) {
-                        alertSound.play().catch(e => console.log("Audio play prevented:", e));
-                        alertPlaying = true;
-                        setTimeout(() => { alertPlaying = false; }, 5000);
-                    }
-                } else {
-                    emergencyBox.classList.remove("emergency-active");
-                }
+                document.getElementById("timestamp").textContent = data.created_at ? 
+                    new Date(data.created_at).toLocaleString() : "Not available";
+            } catch (error) {
+                console.error("Error fetching data:", error);
             }
-            
-            // Initial fetch and then every 5 seconds
-            fetchData();
-            setInterval(fetchData, 5000);
-        });
+        }
+        
+        fetchData();
+        setInterval(fetchData, 5000);
     </script>
 </body>
 </html>

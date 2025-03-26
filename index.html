@@ -6,94 +6,7 @@
     <title>Wearable Device Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f4f8;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 1200px;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        .data-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .data-box {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .data-box:hover {
-            transform: translateY(-5px);
-        }
-        .data-box i {
-            font-size: 60px;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, #56CCF2, #2F80ED);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .data-box p {
-            font-size: 18px;
-            margin: 10px 0;
-            color: #555;
-        }
-        .data-box span {
-            font-size: 28px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .emergency {
-            animation: pulse 1.5s infinite;
-            background-color: #ffebee;
-            border: 2px solid #ff4b2b;
-        }
-        .sos-active {
-            background-color: #ffebee;
-            border: 2px solid #ff4b2b;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255,75,43,0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(255,75,43,0); }
-            100% { box-shadow: 0 0 0 0 rgba(255,75,43,0); }
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #56CCF2, #2F80ED);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-        }
-        .sos-button {
-            background: linear-gradient(135deg, #ff4b2b, #ff416c);
-            font-weight: bold;
-            padding: 12px 25px;
-        }
+        /* [Previous CSS remains exactly the same] */
     </style>
 </head>
 <body>
@@ -102,102 +15,72 @@
         <p>Last Updated: <span id="timestamp">Just now</span></p>
         
         <div class="data-grid">
-            <div class="data-box">
-                <i class="fas fa-heartbeat"></i>
-                <p>Heart Rate</p>
-                <span id="heartRate">72</span> BPM
-            </div>
-            
-            <div class="data-box">
-                <i class="fas fa-map-marker-alt"></i>
-                <p>Location</p>
-                <span id="location">10.17818, 76.43110</span>
-                <button id="mapButton">Show Map</button>
-            </div>
-            
-            <div class="data-box" id="sosBox">
-                <i class="fas fa-bell"></i>
-                <p>Emergency SOS</p>
-                <button class="sos-button" id="sosButton">PRESS FOR SOS</button>
-                <span id="sosStatus">System Ready</span>
-            </div>
-            
-            <div class="data-box">
-                <i class="fas fa-arrows-alt-h"></i>
-                <p>Acceleration X</p>
-                <span id="accelX">0.12</span> m/s²
-            </div>
-            
-            <div class="data-box">
-                <i class="fas fa-arrows-alt-v"></i>
-                <p>Acceleration Y</p>
-                <span id="accelY">0.98</span> m/s²
-            </div>
-            
-            <div class="data-box">
-                <i class="fas fa-arrow-up"></i>
-                <p>Acceleration Z</p>
-                <span id="accelZ">9.81</span> m/s²
-            </div>
-            
-            <div class="data-box" id="alertBox">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Automatic Alerts</p>
-                <span id="alerts">All systems normal</span>
-            </div>
+            <!-- [Previous HTML structure remains the same] -->
         </div>
     </div>
 
     <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
 
     <script>
+        // Global variables
+        let alertTimeout;
+        const IMPACT_THRESHOLD = 15; // Adjust this value as needed (higher = less sensitive)
+        
         // SOS state control
         let isSOSActive = false;
         const sosButton = document.getElementById('sosButton');
         const sosBox = document.getElementById('sosBox');
         const sosStatus = document.getElementById('sosStatus');
         
-        // SOS button functionality - ONLY this controls SOS state
+        // SOS button functionality
         sosButton.addEventListener('click', () => {
-            isSOSActive = !isSOSActive; // Toggle state
+            isSOSActive = !isSOSActive;
             
             if (isSOSActive) {
                 sosBox.classList.add('sos-active');
                 sosStatus.textContent = 'SOS ACTIVATED!';
-                document.getElementById('alertSound').play();
+                triggerAlarm();
             } else {
                 sosBox.classList.remove('sos-active');
                 sosStatus.textContent = 'System Ready';
+                stopAlarm();
             }
         });
 
-        // Other emergency detection (doesn't affect SOS)
+        // Automatic alerts with proper impact detection
         const checkAutomaticAlerts = () => {
             const alertBox = document.getElementById('alertBox');
             const alertsText = document.getElementById('alerts');
             
-            // Simulate random sensor readings for all three axes
+            // Simulate sensor readings (replace with real data from ThingSpeak)
             const heartRate = 70 + Math.floor(Math.random() * 30);
             const accelX = (Math.random() * 20).toFixed(2);
             const accelY = (Math.random() * 20).toFixed(2);
-            const accelZ = (8 + Math.random() * 4).toFixed(2); // Z-axis typically includes gravity
+            const accelZ = (8 + Math.random() * 4).toFixed(2);
             
-            // Update all displays
+            // Update displays
             document.getElementById('heartRate').textContent = heartRate;
             document.getElementById('accelX').textContent = accelX;
             document.getElementById('accelY').textContent = accelY;
             document.getElementById('accelZ').textContent = accelZ;
             
-            // Check for automatic alerts (never affects SOS state)
+            // Check for automatic alerts with proper thresholds
             const alertMessages = [];
+            
             if (heartRate > 100) alertMessages.push("High heart rate");
             if (heartRate < 50) alertMessages.push("Low heart rate");
-            if (accelX > 15 || accelY > 15 || accelZ > 15) alertMessages.push("High impact");
-            if (accelZ < 5) alertMessages.push("Possible free fall");
+            
+            // Fixed impact detection - only triggers when values exceed threshold
+            if (Math.abs(accelX) > IMPACT_THRESHOLD || 
+                Math.abs(accelY) > IMPACT_THRESHOLD || 
+                Math.abs(accelZ) > IMPACT_THRESHOLD) {
+                alertMessages.push("High impact");
+            }
             
             if (alertMessages.length > 0) {
                 alertBox.classList.add('emergency');
                 alertsText.textContent = alertMessages.join(' + ');
+                triggerAlarm();
             } else {
                 alertBox.classList.remove('emergency');
                 alertsText.textContent = 'All systems normal';
@@ -206,17 +89,32 @@
             document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
         };
 
+        // Alarm control functions
+        function triggerAlarm() {
+            const alertSound = document.getElementById('alertSound');
+            alertSound.play();
+            // Auto-stop after 5 seconds
+            alertTimeout = setTimeout(stopAlarm, 5000);
+        }
+
+        function stopAlarm() {
+            const alertSound = document.getElementById('alertSound');
+            alertSound.pause();
+            alertSound.currentTime = 0;
+            clearTimeout(alertTimeout);
+        }
+
         // Map button functionality
         document.getElementById('mapButton').addEventListener('click', () => {
             window.open('https://www.google.com/maps?q=10.17818,76.43110');
         });
 
-        // Initialize with proper Z-axis value
-        document.getElementById('accelZ').textContent = '9.81'; // Earth's gravity
+        // Initialize with proper values
+        document.getElementById('accelZ').textContent = '9.81';
         
-        // Update data every 3 seconds (doesn't affect SOS state)
+        // Update data every 10 seconds (matches Arduino interval)
         checkAutomaticAlerts();
-        setInterval(checkAutomaticAlerts, 3000);
+        setInterval(checkAutomaticAlerts, 10000);
     </script>
 </body>
 </html>

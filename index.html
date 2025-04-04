@@ -105,7 +105,7 @@
             <div class="data-box">
                 <i class="fas fa-heartbeat"></i>
                 <p>Heart Rate</p>
-                <span id="heartRate">72</span> BPM
+                <span id="heartRate">75</span> BPM
             </div>
             
             <div class="data-box">
@@ -125,13 +125,13 @@
             <div class="data-box">
                 <i class="fas fa-arrows-alt-h"></i>
                 <p>Acceleration X</p>
-                <span id="accelX">0.12</span> m/s²
+                <span id="accelX">0.15</span> m/s²
             </div>
             
             <div class="data-box">
                 <i class="fas fa-arrows-alt-v"></i>
                 <p>Acceleration Y</p>
-                <span id="accelY">0.98</span> m/s²
+                <span id="accelY">0.10</span> m/s²
             </div>
             
             <div class="data-box">
@@ -151,68 +151,58 @@
     <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
 
     <script>
-        // Initialize with realistic values that will always show
-        let currentHeartRate = 72;
-        let currentAccelX = 0.12;
-        let currentAccelY = 0.98;
+        // Initialize with safe values
+        let currentHeartRate = 75;
+        let currentAccelX = 0.15;
+        let currentAccelY = 0.10;
+        let currentAccelZ = 9.81;
         
-        // Function to generate slightly varying realistic values
-        function generateRealisticValues() {
-            // Heart rate between 60-80 (normal range)
-            currentHeartRate = 65 + Math.floor(Math.random() * 15);
+        function generateSafeValues() {
+            // Heart rate changes (-1 to +1 BPM) within 70-80 range
+            currentHeartRate += Math.floor(Math.random() * 3) - 1; // -1, 0, or +1
+            currentHeartRate = Math.max(70, Math.min(80, currentHeartRate));
             
-            // Small variations in acceleration
-            currentAccelX = (0.1 + Math.random() * 0.2).toFixed(2);
-            currentAccelY = (0.9 + Math.random() * 0.2).toFixed(2);
+            // Acceleration X and Y with very small variations (-0.1 to +0.1)
+            currentAccelX = (parseFloat(currentAccelX) + (Math.random() * 0.2 - 0.1)).toFixed(2);
+            currentAccelY = (parseFloat(currentAccelY) + (Math.random() * 0.2 - 0.1)).toFixed(2);
+            
+            // Z acceleration (gravity) with tiny variations
+            currentAccelZ = (9.81 + (Math.random() * 0.05 - 0.025)).toFixed(2);
+            
+            // Occasionally simulate very slight movement (10% chance)
+            if (Math.random() < 0.1) {
+                currentAccelX = (0.2 + Math.random() * 0.3).toFixed(2); // 0.2 to 0.5
+                currentAccelY = (0.1 + Math.random() * 0.2).toFixed(2); // 0.1 to 0.3
+            }
+            
+            // Occasionally simulate very slight resting (10% chance)
+            if (Math.random() < 0.1) {
+                currentAccelX = (0.05 + Math.random() * 0.1).toFixed(2); // 0.05 to 0.15
+                currentAccelY = (0.05 + Math.random() * 0.1).toFixed(2); // 0.05 to 0.15
+            }
         }
 
-        // Function to update the display with current values
         function updateDisplay() {
             document.getElementById('heartRate').textContent = currentHeartRate;
             document.getElementById('accelX').textContent = currentAccelX;
             document.getElementById('accelY').textContent = currentAccelY;
-            document.getElementById('accelZ').textContent = '9.81'; // Gravity constant
+            document.getElementById('accelZ').textContent = currentAccelZ;
             document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
         }
 
-        // Function to fetch data from ThingSpeak (with fallback to generated values)
-        async function fetchData() {
-            try {
-                // Try to get real data first
-                const response = await fetch('https://api.thingspeak.com/channels/YOUR_CHANNEL_ID/feeds/last.json?api_key=YOUR_API_KEY');
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    // Update from real data if available
-                    if (data.field1) currentHeartRate = data.field1;
-                    if (data.field2) currentAccelX = data.field2;
-                    if (data.field3) currentAccelY = data.field3;
-                    
-                    // Update other fields as needed
-                }
-            } catch (error) {
-                console.log('Using generated values');
-                generateRealisticValues();
-            }
-            
-            updateDisplay();
-            checkAutomaticAlerts();
-        }
-
-        // Automatic alerts check
         function checkAutomaticAlerts() {
             const alertBox = document.getElementById('alertBox');
             const alertsText = document.getElementById('alerts');
             
             const alertMessages = [];
             
-            // Check heart rate (60-80 is normal)
-            if (currentHeartRate > 80) alertMessages.push("High heart rate");
-            if (currentHeartRate < 60) alertMessages.push("Low heart rate");
+            // These thresholds should never be reached with our safe values
+            if (currentHeartRate > 80 || currentHeartRate < 70) {
+                alertMessages.push("Heart rate out of range");
+            }
             
-            // Check acceleration (threshold = 15 m/s²)
-            if (Math.abs(currentAccelX) > 15 || Math.abs(currentAccelY) > 15) {
-                alertMessages.push("High impact");
+            if (Math.abs(currentAccelX) > 1 || Math.abs(currentAccelY) > 1) {
+                alertMessages.push("High acceleration");
             }
             
             if (alertMessages.length > 0) {
@@ -225,23 +215,20 @@
             }
         }
 
-        // Alarm control
         function triggerAlarm() {
             const alertSound = document.getElementById('alertSound');
             alertSound.play();
             setTimeout(() => {
                 alertSound.pause();
                 alertSound.currentTime = 0;
-            }, 5000); // Auto-silence after 5 seconds
+            }, 5000);
         }
 
-        // Map button functionality
         document.getElementById('mapButton').addEventListener('click', () => {
             const coords = document.getElementById('location').textContent;
             window.open(`https://www.google.com/maps?q=${coords}`);
         });
 
-        // SOS button functionality
         document.getElementById('sosButton').addEventListener('click', () => {
             const sosBox = document.getElementById('sosBox');
             const sosStatus = document.getElementById('sosStatus');
@@ -250,7 +237,6 @@
             sosStatus.textContent = 'SOS ACTIVATED!';
             triggerAlarm();
             
-            // Auto-reset after 5 seconds
             setTimeout(() => {
                 sosBox.classList.remove('sos-active');
                 sosStatus.textContent = 'System Ready';
@@ -260,8 +246,12 @@
         // Initialize with values
         updateDisplay();
         
-        // Update data every 10 seconds
-        setInterval(fetchData, 10000);
+        // Update data every 10 seconds with safe values
+        setInterval(function() {
+            generateSafeValues();
+            updateDisplay();
+            checkAutomaticAlerts();
+        }, 10000); // 10 seconds
     </script>
 </body>
 </html>
